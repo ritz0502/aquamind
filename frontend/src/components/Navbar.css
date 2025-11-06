@@ -1,0 +1,138 @@
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Poppins:wght@400;500;600&display=swap');
+
+.navbar {
+  position: fixed; /* now overlays page content */
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  background-color: transparent; /* transparent by default */
+  transition: all 0.4s ease;
+  padding: 10px 0;
+  backdrop-filter: none;
+}
+
+.navbar.hovered {
+  background: rgba(1, 41, 101, 0.85); /* color appears on hover */
+  backdrop-filter: blur(8px);
+}
+
+.navbar-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  /* Updated to move logo left */
+  padding: 0 20px 0 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.navbar-logo {
+  width: 70px;
+  height: 70px;
+  cursor: pointer;
+}
+
+.navbar-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.navbar-brand {
+  font-family: 'Merriweather', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: white;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.navbar-brand:hover {
+  color: #10dfff;
+}
+
+.navbar-center {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  /* Add transition for smooth hiding/showing on scroll */
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Rule 1: Hide the links when scrolled down */
+.navbar.scrolled .navbar-center {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Rule 2: Show the links when scrolled down AND hovered (Higher Specificity Override) */
+.navbar.scrolled.hovered .navbar-center {
+  opacity: 1;
+  visibility: visible;
+}
+
+.nav-link {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #93f7f3, #10dfff);
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover {
+  color: #10dfff;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .navbar-container {
+    /* Adjusted to match the leftward shift on desktop */
+    padding: 0 20px 0 10px;
+  }
+
+  .navbar-center {
+    gap: 25px;
+  }
+
+  .navbar-logo {
+    width: 50px;
+    height: 50px;
+  }
+
+  .navbar-brand {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Keep default mobile hide behavior */
+  .navbar-center {
+    display: none;
+  }
+}
