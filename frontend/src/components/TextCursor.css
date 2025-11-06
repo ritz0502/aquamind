@@ -1,0 +1,19 @@
+.text-cursor-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.text-cursor-item {
+  position: absolute;
+  user-select: none;
+  white-space: nowrap;
+  font-size: 2rem;
+  z-index: 99999;
+  will-change: transform, opacity;
+}

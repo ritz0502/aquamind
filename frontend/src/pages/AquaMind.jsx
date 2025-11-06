@@ -7,6 +7,9 @@ import feature2 from '../assets/feature2.jpg';
 import feature3 from '../assets/feature3.jpg';
 import feature4 from '../assets/feature4.jpg';
 
+import TextCursor from '../components/TextCursor';
+
+
 
 function AquaMind() {
   const scrollToFeatures = () => {
@@ -70,6 +73,18 @@ function AquaMind() {
 
   return (
     <div className="aquamind-landing">
+
+      <TextCursor
+        text="🐟"
+        delay={0.01}
+        spacing={100}
+        followMouseDirection={true}
+        randomFloat={true}
+        exitDuration={0.5}
+        removalInterval={30}
+        maxPoints={5}
+      />
+
       <section className="hero-section">
         <div className="hero-background">
           <LiquidChrome
