@@ -136,3 +136,15 @@
     display: none;
   }
 }
+
+/* Rule 1: Hide the links when scrolled down */
+.navbar.scrolled .navbar-center {
+  opacity: 0;
+  visibility: hidden;
+}
+
+/* Rule 2: Show the links when scrolled down AND hovered */
+.navbar.scrolled.hovered .navbar-center {
+  opacity: 1;
+  visibility: visible;
+}
