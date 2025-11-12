@@ -1,0 +1,7 @@
+{
+  "image": "data/test_images/ocean_pollution3.jpg",
+  "type": "paper",
+  "explanation": "Paper waste detected \u2014 biodegradable, but remove to maintain water clarity.",
+  "mask": "outputs/mask.png",
+  "annotated": "outputs/final_overlay.jpg"
+}

@@ -1,0 +1,23 @@
+# \models\marine_pollution\training_dataset\
+# \models\marine_pollution\data\clean_background\
+# \models\marine_pollution\data\clean_crops\
+# \models\marine_pollution\data\ocean_augmented_dataset\
+# \models\marine_pollution\data\synthetic\
+
+
+
+
+
+
+# Ignore marine pollution datasets
+models/marine_pollution/training_dataset/
+models/marine_pollution/data/clean_backgrounds/
+models/marine_pollution/data/clean_crops/
+models/marine_pollution/data/ocean_augmented_dataset/
+models/marine_pollution/data/synthetic/
+
+
+models/risk_prediction/data/
+
+models/human_activity_risk/data/
+models/human_activity_risk/outputs/

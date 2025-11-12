@@ -1,0 +1,11 @@
+numpy
+pandas
+requests
+erddapy
+prophet>=1.1           # or prophet-nogpl if you prefer
+matplotlib
+tensorflow>=2.12       # for LSTM (CPU)
+scikit-learn
+tqdm
+python-dotenv
+openai                 # or `mistral` SDK if using Mistral — adapt accordingly
