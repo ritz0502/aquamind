@@ -1,34 +1,27 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './Navbar.css';
 import logo from '../assets/logo.png';
 
 function Navbar() {
   const [isHovered, setIsHovered] = useState(false);
-  // 1. New state to track scrolling
   const [isScrolled, setIsScrolled] = useState(false);
   const navbarRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Scroll handling logic
-    const handleScroll = () => {
-      // Set to true if the vertical scroll position is more than 50px
-      setIsScrolled(window.scrollY > 50); 
-    };
-
-    // Hover handling logic (existing)
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     const handleMouseEnter = () => setIsHovered(true);
     const handleMouseLeave = () => setIsHovered(false);
 
-    // Attach listeners
     window.addEventListener('scroll', handleScroll);
     if (navbarRef.current) {
       navbarRef.current.addEventListener('mouseenter', handleMouseEnter);
       navbarRef.current.addEventListener('mouseleave', handleMouseLeave);
     }
 
-    // Cleanup
     return () => {
-      window.removeEventListener('scroll', handleScroll); // Remove scroll listener
+      window.removeEventListener('scroll', handleScroll);
       if (navbarRef.current) {
         navbarRef.current.removeEventListener('mouseenter', handleMouseEnter);
         navbarRef.current.removeEventListener('mouseleave', handleMouseLeave);
@@ -36,19 +29,14 @@ function Navbar() {
     };
   }, []);
 
-  const scrollToSection = (sectionId) => {
-    const element = document.getElementById(sectionId);
-    if (element) element.scrollIntoView({ behavior: 'smooth' });
-  };
-
   const handleBrandClick = () => {
+    navigate('/'); // Navigate to home
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <nav
       ref={navbarRef}
-      // 2. Add the 'scrolled' class when isScrolled is true
       className={`navbar ${isHovered ? 'hovered' : ''} ${isScrolled ? 'scrolled' : ''}`}
     >
       <div className="navbar-container">
@@ -61,12 +49,11 @@ function Navbar() {
           </div>
         </div>
 
-        {/* This is the element we will hide in CSS */}
         <div className="navbar-center">
-          <a className="nav-link" onClick={() => scrollToSection('home')}>Home</a>
-          <a className="nav-link" href="#dashboard">Dashboard</a>
-          <a className="nav-link" href="#about">About</a>
-          <a className="nav-link" href="#contact">Contact</a>
+          <Link className="nav-link" to="/">Home</Link>
+          <Link className="nav-link" to="/dashboard">Dashboard</Link>
+          <Link className="nav-link" to="/about">About</Link>
+          <Link className="nav-link" to="/contact">Contact</Link>
         </div>
 
         <div className="navbar-right"></div>
