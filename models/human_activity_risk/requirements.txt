@@ -1,0 +1,14 @@
+numpy
+pandas
+requests
+scikit-learn
+joblib
+click
+xgboost
+geopandas
+rasterio
+netCDF4
+shapely
+pyproj
+tqdm
+sentinelsat
