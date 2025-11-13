@@ -6,9 +6,9 @@ import Footer from '../components/Footer';
 import { useOceanInput } from '../context/OceanInputContext';
 import { useModelResults } from '../context/ModelResultsContext';
 import { runModel } from '../api/api';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const Pollution = () => {
+const Forecast = () => {
   const navigate = useNavigate();
   const { inputs } = useOceanInput();
   const { updateResult } = useModelResults();
@@ -18,11 +18,11 @@ const Pollution = () => {
   const handleRunModel = async () => {
     setLoading(true);
     try {
-      const response = await runModel('pollution', inputs);
+      const response = await runModel('forecast', inputs);
       setResult(response);
-      updateResult('pollution', response);
+      updateResult('forecast', response);
     } catch (error) {
-      alert('Error running pollution model. Please try again.');
+      alert('Error running forecast model. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -39,13 +39,13 @@ const Pollution = () => {
     mainLayout: {
       display: 'flex',
       flex: 1
-
     },
     contentArea: {
       flex: 1,
       padding: '2rem',
       paddingBottom: '100px',
       paddingTop: '100px'
+
     },
     header: {
       fontFamily: 'Merriweather, serif',
@@ -121,7 +121,7 @@ const Pollution = () => {
       cursor: 'not-allowed'
     },
     resultMetric: {
-      fontSize: '3rem',
+      fontSize: '2rem',
       fontWeight: 'bold',
       color: '#00b4d8',
       marginBottom: '1rem',
@@ -134,7 +134,7 @@ const Pollution = () => {
       fontFamily: 'Poppins, sans-serif'
     },
     chartContainer: {
-      height: '300px',
+      height: '350px',
       marginTop: '2rem'
     }
   };
@@ -145,8 +145,8 @@ const Pollution = () => {
       <div style={styles.mainLayout}>
         <Sidebar />
         <div style={styles.contentArea}>
-          <h1 style={styles.header}>🏭 Ocean Pollution Analysis</h1>
-          <p style={styles.subheader}>Analyzing chemical and pollutant levels in ocean water</p>
+          <h1 style={styles.header}>🌊 Ocean Forecast Model</h1>
+          <p style={styles.subheader}>Predicting ocean conditions for the next 7 days</p>
 
           <div style={styles.section}>
             <h3 style={styles.sectionTitle}>Current Input Parameters</h3>
@@ -164,29 +164,25 @@ const Pollution = () => {
                 <span style={styles.inputValue}>{inputs.depth ? `${inputs.depth}m` : 'N/A'}</span>
               </div>
               <div style={styles.inputItem}>
-                <span style={styles.inputLabel}>Salinity:</span>
-                <span style={styles.inputValue}>{inputs.salinity ? `${inputs.salinity} PSU` : 'N/A'}</span>
-              </div>
-              <div style={styles.inputItem}>
                 <span style={styles.inputLabel}>Temperature:</span>
                 <span style={styles.inputValue}>{inputs.temperature ? `${inputs.temperature}°C` : 'N/A'}</span>
               </div>
               <div style={styles.inputItem}>
-                <span style={styles.inputLabel}>pH:</span>
-                <span style={styles.inputValue}>{inputs.pH || 'N/A'}</span>
+                <span style={styles.inputLabel}>Salinity:</span>
+                <span style={styles.inputValue}>{inputs.salinity ? `${inputs.salinity} PSU` : 'N/A'}</span>
               </div>
             </div>
           </div>
 
           {result && (
             <div style={styles.section}>
-              <h3 style={styles.sectionTitle}>Analysis Results</h3>
-              <div style={styles.resultMetric}>Score: {result.results?.score}</div>
+              <h3 style={styles.sectionTitle}>Forecast Results</h3>
+              <div style={styles.resultMetric}>{result.results?.forecast_summary}</div>
               <p style={styles.resultInsight}>{result.results?.insight}</p>
               {result.results?.chartData && (
                 <div style={styles.chartContainer}>
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={result.results.chartData}>
+                    <LineChart data={result.results.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 180, 216, 0.2)" />
                       <XAxis dataKey="day" stroke="#90e0ef" />
                       <YAxis stroke="#90e0ef" />
@@ -197,8 +193,10 @@ const Pollution = () => {
                           borderRadius: '8px'
                         }}
                       />
-                      <Bar dataKey="value" fill="#00b4d8" />
-                    </BarChart>
+                      <Legend />
+                      <Line type="monotone" dataKey="temperature" stroke="#00b4d8" strokeWidth={2} name="Temp (°C)" />
+                      <Line type="monotone" dataKey="waveHeight" stroke="#90e0ef" strokeWidth={2} name="Wave (m)" />
+                    </LineChart>
                   </ResponsiveContainer>
                 </div>
               )}
@@ -208,10 +206,10 @@ const Pollution = () => {
           <div style={styles.buttonGroup}>
             <button
               style={{ ...styles.button, ...styles.secondaryButton }}
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/coral')}
               onMouseEnter={(e) => {
                 e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 0 20px rgba(0, 180, 216,0.4)';
+                e.target.style.boxShadow = '0 0 20px rgba(0, 180, 216, 0.4)';
               }}
               onMouseLeave={(e) => {
                 e.target.style.transform = 'translateY(0)';
@@ -242,7 +240,7 @@ const Pollution = () => {
                 ...styles.button,
                 ...(result ? {} : styles.disabledButton)
               }}
-              onClick={() => navigate('/coral')}
+              onClick={() => navigate('/activity')}
               disabled={!result}
               onMouseEnter={(e) => {
                 if (result) {
@@ -265,4 +263,4 @@ const Pollution = () => {
   );
 };
 
-export default Pollution;
+export default Forecast;

@@ -1,331 +1,272 @@
-# app.py
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify
 from flask_cors import CORS
-import subprocess
-import os
-from datetime import datetime
-import traceback
+import numpy as np
+from datetime import datetime, timedelta
+import random
 
 app = Flask(__name__)
+CORS(app)
 
-# Enable CORS for React frontend
-CORS(app, resources={
-    r"/*": {
-        "origins": ["http://localhost:3000", "http://localhost:5173"],
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
-    }
-})
+# Helper function to generate mock data
+def generate_chart_data(days=7, data_type='line'):
+    if data_type == 'line':
+        return [{'day': f'Day {i+1}', 'value': random.randint(40, 90)} for i in range(days)]
+    elif data_type == 'bar':
+        return [{'day': f'Day {i+1}', 'value': random.randint(30, 100)} for i in range(days)]
+    elif data_type == 'forecast':
+        return [
+            {
+                'day': f'Day {i+1}',
+                'temperature': round(random.uniform(20, 28), 1),
+                'waveHeight': round(random.uniform(1, 4), 1)
+            } for i in range(days)
+        ]
+    elif data_type == 'activity':
+        return [
+            {'category': cat, 'count': random.randint(5, 50)}
+            for cat in ['Cargo', 'Tankers', 'Fishing', 'Tourism']
+        ]
+    elif data_type == 'anomaly':
+        return [
+            {'time': f'{i}:00', 'reading': random.randint(50, 95)}
+            for i in range(1, 13)
+        ]
+    elif data_type == 'health':
+        return [
+            {'month': month, 'health': random.randint(55, 85)}
+            for month in ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+        ]
 
-BASE_DIR = os.path.dirname(__file__)
-SRC_DIR = os.path.join(BASE_DIR, "src")
-DATA_DIR = os.path.join(BASE_DIR, "data")
-
-# Ensure necessary directories exist
-os.makedirs(os.path.join(DATA_DIR, "reports"), exist_ok=True)
-os.makedirs(os.path.join(DATA_DIR, "risk"), exist_ok=True)
-os.makedirs(os.path.join(DATA_DIR, "plots"), exist_ok=True)
-
-
-@app.route("/", methods=["GET"])
-def index():
-    """API information endpoint."""
-    return jsonify({
-        "message": "🌊 Marine Risk Prediction API",
-        "version": "1.0.0",
-        "status": "running",
-        "endpoints": {
-            "POST /run_pipeline": {
-                "description": "Run full pipeline for given coordinates",
-                "parameters": {
-                    "lat": "Latitude (-90 to 90)",
-                    "lon": "Longitude (-180 to 180)",
-                    "forecast_days": "Number of forecast days (default: 30)",
-                    "quick_mode": "Enable quick processing mode (default: true)"
-                }
-            },
-            "GET /get_plot": {
-                "description": "Fetch risk plot image",
-                "parameters": {
-                    "lat": "Latitude",
-                    "lon": "Longitude"
-                }
-            },
-            "GET /health": {
-                "description": "Check API health status"
-            }
-        }
-    })
-
-
-@app.route("/health", methods=["GET"])
-def health_check():
-    """Health check endpoint."""
-    return jsonify({
-        "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat(),
-        "data_dir": DATA_DIR,
-        "src_dir": SRC_DIR
-    })
-
-
-@app.route("/run_pipeline", methods=["POST", "OPTIONS"])
-def run_pipeline():
-    """Run the marine risk prediction pipeline for given coordinates."""
-    
-    # Handle preflight request
-    if request.method == "OPTIONS":
-        return "", 204
-    
+# Pollution Detection Endpoint
+@app.route('/api/pollution/run', methods=['POST'])
+def pollution_detection():
     try:
-        data = request.get_json()
+        data = request.json
+        lat = float(data.get('lat', 0))
+        lon = float(data.get('lon', 0))
+        depth = float(data.get('depth', 0))
+        salinity = float(data.get('salinity', 35))
+        temperature = float(data.get('temperature', 25))
+        pH = float(data.get('pH', 8.1))
         
-        # Validate input
-        if not data:
-            return jsonify({
-                "status": "error",
-                "message": "No data provided in request body"
-            }), 400
+        # Simulate pollution score based on parameters
+        pollution_score = int(50 + (35 - salinity) * 2 + abs(8.1 - pH) * 10)
+        pollution_score = max(0, min(100, pollution_score))
         
-        # Extract and validate parameters
-        try:
-            lat = float(data.get("lat"))
-            lon = float(data.get("lon"))
-        except (TypeError, ValueError):
-            return jsonify({
-                "status": "error",
-                "message": "Invalid latitude or longitude. Must be numeric values."
-            }), 400
+        if pollution_score < 40:
+            insight = "Low pollution detected. Water quality is excellent for marine life."
+        elif pollution_score < 70:
+            insight = "Moderate pollution levels detected. Some concern for sensitive species."
+        else:
+            insight = "High pollution detected. Immediate action recommended to protect ecosystem."
         
-        # Validate coordinate ranges
-        if not (-90 <= lat <= 90):
-            return jsonify({
-                "status": "error",
-                "message": "Latitude must be between -90 and 90"
-            }), 400
+        return jsonify({
+            'status': 'success',
+            'model': 'pollution',
+            'results': {
+                'score': f'{pollution_score}%',
+                'insight': insight,
+                'chartData': generate_chart_data(7, 'bar')
+            }
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 400
+
+# Coral Health Endpoint
+@app.route('/api/coral/run', methods=['POST'])
+def coral_health():
+    try:
+        data = request.json
+        temperature = float(data.get('temperature', 25))
+        pH = float(data.get('pH', 8.1))
+        depth = float(data.get('depth', 10))
         
-        if not (-180 <= lon <= 180):
-            return jsonify({
-                "status": "error",
-                "message": "Longitude must be between -180 and 180"
-            }), 400
+        # Simulate coral health score
+        health_score = int(85 - abs(26 - temperature) * 5 - abs(8.2 - pH) * 10)
+        health_score = max(30, min(100, health_score))
         
-        forecast_days = int(data.get("forecast_days", 30))
-        quick_mode = data.get("quick_mode", True)
+        if health_score > 75:
+            insight = "Coral health is good. Minimal bleaching risk detected."
+        elif health_score > 50:
+            insight = "Moderate coral stress detected. Early bleaching signs possible."
+        else:
+            insight = "Severe coral stress. High bleaching risk - urgent intervention needed."
         
-        # Validate forecast_days
-        if not (1 <= forecast_days <= 365):
-            return jsonify({
-                "status": "error",
-                "message": "Forecast days must be between 1 and 365"
-            }), 400
+        return jsonify({
+            'status': 'success',
+            'model': 'coral',
+            'results': {
+                'health_score': f'{health_score}%',
+                'insight': insight,
+                'chartData': generate_chart_data(6, 'health')
+            }
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 400
+
+# Ocean Forecast Endpoint
+@app.route('/api/forecast/run', methods=['POST'])
+def ocean_forecast():
+    try:
+        data = request.json
+        lat = float(data.get('lat', 0))
+        temperature = float(data.get('temperature', 25))
         
-        print(f"🌊 Running pipeline for ({lat}, {lon}) | {forecast_days} days | quick={quick_mode}")
+        # Simulate forecast
+        trend = "stable" if abs(lat) < 30 else "warming"
         
-        # Construct command
-        cmd = [
-            "python", os.path.join(SRC_DIR, "run_pipeline.py"),
-            "--lat", str(lat),
-            "--lon", str(lon),
-            "--forecast_days", str(forecast_days)
+        if trend == "stable":
+            summary = "Stable Conditions Expected"
+            insight = "Ocean conditions expected to remain stable over the next 7 days. Favorable for marine activities."
+        else:
+            summary = "Temperature Increase Predicted"
+            insight = "Gradual warming trend detected. Monitor coral reef areas and adjust conservation strategies."
+        
+        return jsonify({
+            'status': 'success',
+            'model': 'forecast',
+            'results': {
+                'forecast_summary': summary,
+                'insight': insight,
+                'chartData': generate_chart_data(7, 'forecast')
+            }
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 400
+
+# Human Activity Endpoint
+@app.route('/api/activity/run', methods=['POST'])
+def human_activity():
+    try:
+        data = request.json
+        lat = float(data.get('lat', 0))
+        lon = float(data.get('lon', 0))
+        
+        # Simulate activity metrics
+        ships_detected = random.randint(5, 45)
+        ports_nearby = random.randint(0, 5)
+        tourism_density = random.randint(1, 10)
+        
+        if ships_detected > 30:
+            insight = "High shipping traffic detected. Increased collision risk for marine mammals."
+        elif ships_detected > 15:
+            insight = "Moderate marine activity. Regular monitoring recommended."
+        else:
+            insight = "Low human activity. Minimal disturbance to marine ecosystem."
+        
+        return jsonify({
+            'status': 'success',
+            'model': 'activity',
+            'results': {
+                'ships_detected': ships_detected,
+                'ports_nearby': ports_nearby,
+                'tourism_density': tourism_density,
+                'insight': insight,
+                'chartData': generate_chart_data(4, 'activity')
+            }
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 400
+
+# Anomaly Detection Endpoint
+@app.route('/api/anomalies/run', methods=['POST'])
+def anomaly_detection():
+    try:
+        data = request.json
+        temperature = float(data.get('temperature', 25))
+        salinity = float(data.get('salinity', 35))
+        pH = float(data.get('pH', 8.1))
+        
+        # Detect anomalies
+        anomalies = []
+        risk_level = "Low Risk"
+        
+        if abs(temperature - 25) > 3:
+            anomalies.append(f"Temperature anomaly detected: {temperature}°C (expected ~25°C)")
+            risk_level = "Medium Risk"
+        
+        if abs(salinity - 35) > 3:
+            anomalies.append(f"Salinity anomaly detected: {salinity} PSU (expected ~35 PSU)")
+            risk_level = "Medium Risk"
+        
+        if abs(pH - 8.1) > 0.3:
+            anomalies.append(f"pH anomaly detected: {pH} (expected ~8.1)")
+            risk_level = "High Risk"
+        
+        if not anomalies:
+            anomalies.append("No significant anomalies detected. Parameters within normal ranges.")
+            insight = "All ocean parameters are within expected ranges. Ecosystem appears stable."
+        else:
+            insight = f"{len(anomalies)} anomaly detected. Investigate potential environmental changes."
+        
+        return jsonify({
+            'status': 'success',
+            'model': 'anomalies',
+            'results': {
+                'risk_level': risk_level,
+                'anomalies': anomalies,
+                'insight': insight,
+                'chartData': generate_chart_data(12, 'anomaly')
+            }
+        })
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 400
+
+# MEHI (Marine Ecosystem Health Index) Endpoint
+@app.route('/api/mehi/run', methods=['POST'])
+def mehi_index():
+    try:
+        data = request.json
+        
+        # Calculate composite MEHI score from various indicators
+        water_quality = random.randint(65, 90)
+        biodiversity = random.randint(60, 85)
+        coral_health = random.randint(55, 80)
+        pollution_level = random.randint(70, 95)
+        human_impact = random.randint(50, 75)
+        
+        mehi_score = int((water_quality + biodiversity + coral_health + pollution_level + human_impact) / 5)
+        
+        if mehi_score > 80:
+            insight = "Excellent ecosystem health. Marine environment is thriving with high biodiversity."
+        elif mehi_score > 65:
+            insight = "Good ecosystem health. Some areas need attention but overall positive indicators."
+        elif mehi_score > 50:
+            insight = "Moderate ecosystem health. Several concerning factors require intervention."
+        else:
+            insight = "Poor ecosystem health. Critical intervention needed to restore marine balance."
+        
+        radar_data = [
+            {'indicator': 'Water Quality', 'value': water_quality},
+            {'indicator': 'Biodiversity', 'value': biodiversity},
+            {'indicator': 'Coral Health', 'value': coral_health},
+            {'indicator': 'Pollution Control', 'value': pollution_level},
+            {'indicator': 'Human Impact', 'value': human_impact}
         ]
         
-        if quick_mode:
-            cmd.append("--quick_mode")
-        
-        # Run the pipeline
-        result = subprocess.run(
-            cmd,
-            check=True,
-            capture_output=True,
-            text=True,
-            timeout=300  # 5 minute timeout
-        )
-        
-        print("Pipeline stdout:", result.stdout)
-        if result.stderr:
-            print("Pipeline stderr:", result.stderr)
-        
-        # Locate generated files
-        report_path = os.path.join(DATA_DIR, "reports", f"marine_risk_report_{lat}_{lon}.txt")
-        risk_csv = os.path.join(DATA_DIR, "risk", f"marine_risk_forecast_{lat}_{lon}.csv")
-        plot_path = os.path.join(DATA_DIR, "plots", f"marine_risk_index_{lat}_{lon}.png")
-        
-        # Check if report file exists
-        if not os.path.exists(report_path):
-            return jsonify({
-                "status": "error",
-                "message": f"Report file not generated. Pipeline may have failed silently.",
-                "expected_path": report_path
-            }), 500
-        
-        # Read report text
-        with open(report_path, "r", encoding="utf-8") as f:
-            report_text = f.read()
-        
-        # Extract risk level from report
-        risk_level = "Unknown"
-        for line in report_text.splitlines():
-            if "Risk Level:" in line:
-                risk_level = line.split(":")[-1].strip().capitalize()
-                break
-        
-        # Check if other files exist
-        files_status = {
-            "report": os.path.exists(report_path),
-            "risk_csv": os.path.exists(risk_csv),
-            "plot": os.path.exists(plot_path)
-        }
-        
         return jsonify({
-            "status": "success",
-            "message": "Pipeline executed successfully",
-            "coordinates": {
-                "lat": lat,
-                "lon": lon
-            },
-            "risk_level": risk_level,
-            "report_text": report_text,
-            "files": files_status,
-            "paths": {
-                "report": report_path,
-                "risk_data": risk_csv,
-                "plot": plot_path
-            },
-            "timestamp": datetime.utcnow().isoformat()
-        }), 200
-        
-    except subprocess.TimeoutExpired:
-        return jsonify({
-            "status": "error",
-            "message": "Pipeline execution timed out. Try using quick_mode or reducing forecast_days."
-        }), 504
-        
-    except subprocess.CalledProcessError as e:
-        error_details = {
-            "stdout": e.stdout if hasattr(e, 'stdout') else None,
-            "stderr": e.stderr if hasattr(e, 'stderr') else None,
-            "returncode": e.returncode
-        }
-        print(f"Pipeline failed with error: {error_details}")
-        
-        return jsonify({
-            "status": "error",
-            "message": f"Pipeline execution failed with return code {e.returncode}",
-            "details": error_details
-        }), 500
-        
-    except FileNotFoundError as e:
-        return jsonify({
-            "status": "error",
-            "message": f"Required file not found: {str(e)}",
-            "suggestion": "Ensure run_pipeline.py exists in the src directory"
-        }), 500
-        
+            'status': 'success',
+            'model': 'mehi',
+            'results': {
+                'mehi_score': f'{mehi_score}/100',
+                'insight': insight,
+                'indicators': {
+                    'water_quality': f'{water_quality}%',
+                    'biodiversity': f'{biodiversity}%',
+                    'coral_health': f'{coral_health}%',
+                    'pollution_control': f'{pollution_level}%',
+                    'human_impact': f'{human_impact}%'
+                },
+                'radarData': radar_data
+            }
+        })
     except Exception as e:
-        print(f"Unexpected error: {traceback.format_exc()}")
-        return jsonify({
-            "status": "error",
-            "message": f"Unexpected error: {str(e)}",
-            "type": type(e).__name__
-        }), 500
+        return jsonify({'status': 'error', 'message': str(e)}), 400
 
+# Health check endpoint
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    return jsonify({'status': 'healthy', 'timestamp': datetime.now().isoformat()})
 
-@app.route("/get_plot", methods=["GET"])
-def get_plot():
-    """Serve the latest risk plot as an image."""
-    try:
-        lat = request.args.get("lat")
-        lon = request.args.get("lon")
-        
-        if not lat or not lon:
-            return jsonify({
-                "status": "error",
-                "message": "Missing lat or lon parameter"
-            }), 400
-        
-        plot_path = os.path.join(DATA_DIR, "plots", f"marine_risk_index_{lat}_{lon}.png")
-        
-        if os.path.exists(plot_path):
-            return send_file(
-                plot_path,
-                mimetype="image/png",
-                as_attachment=False,
-                download_name=f"marine_risk_plot_{lat}_{lon}.png"
-            )
-        else:
-            return jsonify({
-                "status": "error",
-                "message": "Plot not found",
-                "expected_path": plot_path
-            }), 404
-            
-    except Exception as e:
-        return jsonify({
-            "status": "error",
-            "message": f"Error serving plot: {str(e)}"
-        }), 500
-
-
-@app.route("/get_risk_data", methods=["GET"])
-def get_risk_data():
-    """Serve the risk data CSV as JSON."""
-    try:
-        lat = request.args.get("lat")
-        lon = request.args.get("lon")
-        
-        if not lat or not lon:
-            return jsonify({
-                "status": "error",
-                "message": "Missing lat or lon parameter"
-            }), 400
-        
-        csv_path = os.path.join(DATA_DIR, "risk", f"marine_risk_forecast_{lat}_{lon}.csv")
-        
-        if os.path.exists(csv_path):
-            import pandas as pd
-            df = pd.read_csv(csv_path)
-            return jsonify({
-                "status": "success",
-                "data": df.to_dict(orient="records")
-            })
-        else:
-            return jsonify({
-                "status": "error",
-                "message": "Risk data CSV not found"
-            }), 404
-            
-    except Exception as e:
-        return jsonify({
-            "status": "error",
-            "message": f"Error serving risk data: {str(e)}"
-        }), 500
-
-
-# Error handlers
-@app.errorhandler(404)
-def not_found(e):
-    return jsonify({
-        "status": "error",
-        "message": "Endpoint not found",
-        "available_endpoints": ["/", "/run_pipeline", "/get_plot", "/get_risk_data", "/health"]
-    }), 404
-
-
-@app.errorhandler(500)
-def internal_error(e):
-    return jsonify({
-        "status": "error",
-        "message": "Internal server error",
-        "details": str(e)
-    }), 500
-
-
-if __name__ == "__main__":
-    print("🌊 Marine Risk Prediction API Starting...")
-    print(f"📁 Data Directory: {DATA_DIR}")
-    print(f"📁 Source Directory: {SRC_DIR}")
-    print("🔗 Server running on http://localhost:5000")
-    print("✅ CORS enabled for http://localhost:3000 and http://localhost:5173")
-    
-    app.run(host="0.0.0.0", port=5000, debug=True)
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0', port=5000)
