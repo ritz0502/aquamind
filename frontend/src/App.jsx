@@ -11,6 +11,8 @@ import Activity from './pages/Pollution';
 import Anomalies from './pages/Pollution';
 import MEHI from './pages/Pollution';
 import Hub from './pages/Pollution';
+import About from './pages/About';
+import Contact from './pages/Contact';
 
 function App() {
   return (
@@ -26,6 +28,8 @@ function App() {
         <Route path="/anomalies" element={<Anomalies />} />
         <Route path="/mehi" element={<MEHI />} />
         <Route path="/hub" element={<Hub />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
       </Routes>
       <Footer />
     </Router>
