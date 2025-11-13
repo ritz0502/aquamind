@@ -8,7 +8,7 @@ import { useModelResults } from '../context/ModelResultsContext';
 import { runModel } from '../api/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const Pollution = () => {
+const Activity = () => {
   const navigate = useNavigate();
   const { inputs } = useOceanInput();
   const { updateResult } = useModelResults();
@@ -18,11 +18,11 @@ const Pollution = () => {
   const handleRunModel = async () => {
     setLoading(true);
     try {
-      const response = await runModel('pollution', inputs);
+      const response = await runModel('activity', inputs);
       setResult(response);
-      updateResult('pollution', response);
+      updateResult('activity', response);
     } catch (error) {
-      alert('Error running pollution model. Please try again.');
+      alert('Error running activity model. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -39,13 +39,13 @@ const Pollution = () => {
     mainLayout: {
       display: 'flex',
       flex: 1
-
     },
     contentArea: {
       flex: 1,
       padding: '2rem',
       paddingBottom: '100px',
       paddingTop: '100px'
+
     },
     header: {
       fontFamily: 'Merriweather, serif',
@@ -120,11 +120,29 @@ const Pollution = () => {
       opacity: 0.5,
       cursor: 'not-allowed'
     },
-    resultMetric: {
-      fontSize: '3rem',
+    metricsGrid: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+      gap: '1.5rem',
+      marginBottom: '2rem'
+    },
+    metricCard: {
+      background: 'rgba(0, 180, 216, 0.1)',
+      padding: '1rem',
+      borderRadius: '8px',
+      border: '1px solid rgba(0, 180, 216, 0.3)',
+      textAlign: 'center'
+    },
+    metricValue: {
+      fontSize: '2.5rem',
       fontWeight: 'bold',
       color: '#00b4d8',
-      marginBottom: '1rem',
+      fontFamily: 'Poppins, sans-serif'
+    },
+    metricLabel: {
+      fontSize: '0.9rem',
+      color: '#90e0ef',
+      marginTop: '0.5rem',
       fontFamily: 'Poppins, sans-serif'
     },
     resultInsight: {
@@ -145,8 +163,8 @@ const Pollution = () => {
       <div style={styles.mainLayout}>
         <Sidebar />
         <div style={styles.contentArea}>
-          <h1 style={styles.header}>🏭 Ocean Pollution Analysis</h1>
-          <p style={styles.subheader}>Analyzing chemical and pollutant levels in ocean water</p>
+          <h1 style={styles.header}>🚢 Human Activity Analysis</h1>
+          <p style={styles.subheader}>Monitoring shipping traffic, tourism, and marine activity</p>
 
           <div style={styles.section}>
             <h3 style={styles.sectionTitle}>Current Input Parameters</h3>
@@ -159,36 +177,33 @@ const Pollution = () => {
                 <span style={styles.inputLabel}>Longitude:</span>
                 <span style={styles.inputValue}>{inputs.lon || 'N/A'}</span>
               </div>
-              <div style={styles.inputItem}>
-                <span style={styles.inputLabel}>Depth:</span>
-                <span style={styles.inputValue}>{inputs.depth ? `${inputs.depth}m` : 'N/A'}</span>
-              </div>
-              <div style={styles.inputItem}>
-                <span style={styles.inputLabel}>Salinity:</span>
-                <span style={styles.inputValue}>{inputs.salinity ? `${inputs.salinity} PSU` : 'N/A'}</span>
-              </div>
-              <div style={styles.inputItem}>
-                <span style={styles.inputLabel}>Temperature:</span>
-                <span style={styles.inputValue}>{inputs.temperature ? `${inputs.temperature}°C` : 'N/A'}</span>
-              </div>
-              <div style={styles.inputItem}>
-                <span style={styles.inputLabel}>pH:</span>
-                <span style={styles.inputValue}>{inputs.pH || 'N/A'}</span>
-              </div>
             </div>
           </div>
 
           {result && (
             <div style={styles.section}>
-              <h3 style={styles.sectionTitle}>Analysis Results</h3>
-              <div style={styles.resultMetric}>Score: {result.results?.score}</div>
+              <h3 style={styles.sectionTitle}>Activity Analysis Results</h3>
+              <div style={styles.metricsGrid}>
+                <div style={styles.metricCard}>
+                  <div style={styles.metricValue}>{result.results?.ships_detected || 0}</div>
+                  <div style={styles.metricLabel}>Ships Detected</div>
+                </div>
+                <div style={styles.metricCard}>
+                  <div style={styles.metricValue}>{result.results?.ports_nearby || 0}</div>
+                  <div style={styles.metricLabel}>Nearby Ports</div>
+                </div>
+                <div style={styles.metricCard}>
+                  <div style={styles.metricValue}>{result.results?.tourism_density || 0}</div>
+                  <div style={styles.metricLabel}>Tourism Density</div>
+                </div>
+              </div>
               <p style={styles.resultInsight}>{result.results?.insight}</p>
               {result.results?.chartData && (
                 <div style={styles.chartContainer}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={result.results.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 180, 216, 0.2)" />
-                      <XAxis dataKey="day" stroke="#90e0ef" />
+                      <XAxis dataKey="category" stroke="#90e0ef" />
                       <YAxis stroke="#90e0ef" />
                       <Tooltip
                         contentStyle={{
@@ -197,7 +212,7 @@ const Pollution = () => {
                           borderRadius: '8px'
                         }}
                       />
-                      <Bar dataKey="value" fill="#00b4d8" />
+                      <Bar dataKey="count" fill="#00b4d8" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -208,10 +223,10 @@ const Pollution = () => {
           <div style={styles.buttonGroup}>
             <button
               style={{ ...styles.button, ...styles.secondaryButton }}
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/forecast')}
               onMouseEnter={(e) => {
                 e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 0 20px rgba(0, 180, 216,0.4)';
+                e.target.style.boxShadow = '0 0 20px rgba(0, 180, 216, 0.4)';
               }}
               onMouseLeave={(e) => {
                 e.target.style.transform = 'translateY(0)';
@@ -242,7 +257,7 @@ const Pollution = () => {
                 ...styles.button,
                 ...(result ? {} : styles.disabledButton)
               }}
-              onClick={() => navigate('/coral')}
+              onClick={() => navigate('/anomalies')}
               disabled={!result}
               onMouseEnter={(e) => {
                 if (result) {
@@ -265,4 +280,4 @@ const Pollution = () => {
   );
 };
 
-export default Pollution;
+export default Activity;  
