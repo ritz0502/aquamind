@@ -8,7 +8,7 @@
 
 
 
-
+models/risk_prediction/.env
 # Ignore marine pollution datasets
 models/marine_pollution/training_dataset/
 models/marine_pollution/data/clean_backgrounds/
