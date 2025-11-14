@@ -1,136 +1,19 @@
-<<<<<<< HEAD
 # src/run_pipeline.py
 
-=======
-# # src/run_pipeline.py
-# import subprocess
-# import argparse
-# import os
-# import time
-# import sys
-# from datetime import datetime
-
-# BASE_DIR = os.path.dirname(__file__)
-
-# # Pipeline stages in order (label, script)
-# STAGES = [
-#     ("📥 Data Fetching", "fetch_data.py"),
-#     ("🧹 Preprocessing", "preprocess.py"),
-#     ("🔮 Prophet Forecast", "train_prophet.py"),
-#     ("🧠 LSTM Forecast", "train_lstm.py"),
-#     ("⚙️ Fusion & Risk", "forecast_and_risk.py"),
-#     ("🗒️ Report Generation", "llm_report.py")
-# ]
-
-# def run_stage(label, script, lat, lon, forecast_days, history_days):
-#     print(f"\n==============================")
-#     print(f"{label} ({script})")
-#     print("==============================")
-
-#     script_path = os.path.join(BASE_DIR, script)
-#     if not os.path.exists(script_path):
-#         print(f"❌ Script not found: {script_path}")
-#         return False
-
-#     # Use the same Python interpreter that's running this script (ensures venv)
-#     cmd = [sys.executable, script_path, "--lat", str(lat), "--lon", str(lon)]
-
-#     # Only pass extra args to scripts that expect them
-#     script_name = os.path.basename(script)
-#     if script_name == "fetch_data.py":
-#         # fetch_data expects --days (historical window)
-#         cmd += ["--days", str(history_days)]
-#     if script_name in ("train_prophet.py", "train_lstm.py"):
-#         # these accept --forecast_days
-#         cmd += ["--forecast_days", str(forecast_days)]
-#     # forecast_and_risk.py and llm_report.py do not need forecast_days
-
-#     # Run the script
-#     start = time.time()
-#     try:
-#         subprocess.run(cmd, check=True)
-#         duration = time.time() - start
-#         print(f"✅ {label} completed in {duration:.1f}s.")
-#         return True
-#     except subprocess.CalledProcessError as e:
-#         print(f"❌ Error in {label}: {e}")
-#         return False
-#     except Exception as e:
-#         print(f"❌ Unexpected error in {label}: {e}")
-#         return False
-
-
-# def main(lat, lon, forecast_days, history_days):
-#     print("\n==============================")
-#     print("🌊 MARINE RISK PREDICTION PIPELINE")
-#     print("==============================")
-#     print(f"Coordinates: ({lat}, {lon})")
-#     print(f"Forecast horizon: {forecast_days} days | History window: {history_days} days")
-#     print("==============================\n")
-
-#     pipeline_start = time.time()
-
-#     for label, script in STAGES:
-#         success = run_stage(label, script, lat, lon, forecast_days, history_days)
-#         if not success:
-#             print(f"⚠️ Pipeline stopped at stage: {label}")
-#             return
-
-#     total_time = (time.time() - pipeline_start) / 60
-#     print("\n==============================")
-#     print("✅ PIPELINE COMPLETED SUCCESSFULLY")
-#     print("==============================")
-#     print(f"🕒 Total time taken: {total_time:.2f} minutes")
-#     print(f"📊 Reports saved in: data/reports/")
-#     print(f"🖼️ Plots saved in: data/plots/")
-#     print(f"💾 Forecast data saved in: data/forecasts/")
-#     print(f"\nReport generated on {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}")
-#     print("==============================\n")
-
-
-# if __name__ == "__main__":
-#     parser = argparse.ArgumentParser(description="Run full marine risk prediction pipeline.")
-#     parser.add_argument("--lat", type=float, required=True, help="Latitude coordinate")
-#     parser.add_argument("--lon", type=float, required=True, help="Longitude coordinate")
-#     parser.add_argument("--forecast_days", type=int, default=30, help="Forecast horizon in days (passed to train scripts)")
-#     parser.add_argument("--history_days", type=int, default=60, help="Historical days to fetch (passed to fetch_data.py as --days)")
-#     args = parser.parse_args()
-
-#     main(args.lat, args.lon, args.forecast_days, args.history_days)
-
-
-
-
-
-
-
-
-
-
-
-# src/run_pipeline.py
->>>>>>> 806c8e1921104feee35ce99ac3e5bd22697574c8
 import subprocess
 import argparse
 import os
 import time
 import sys
 from datetime import datetime
-<<<<<<< HEAD
-sys.stdout.reconfigure(encoding='utf-8')
+
+sys.stdout.reconfigure(encoding="utf-8")
 
 BASE_DIR = os.path.dirname(__file__)
 
-# Pipeline stages in order (same as working old version)
-=======
-import sys
-sys.stdout.reconfigure(encoding='utf-8')
-
-
-BASE_DIR = os.path.dirname(__file__)
-
-# --- CONFIGURABLE PIPELINE STAGES ---
->>>>>>> 806c8e1921104feee35ce99ac3e5bd22697574c8
+# ============================
+# Pipeline Stages
+# ============================
 STAGES = [
     ("📥 Data Fetching", "fetch_data.py"),
     ("🧹 Preprocessing", "preprocess.py"),
@@ -140,82 +23,75 @@ STAGES = [
     ("🗒️ Report Generation", "llm_report.py")
 ]
 
-<<<<<<< HEAD
-# Data directories
+# ============================
+# Data Directories
+# ============================
 DATA_DIR = os.path.join(BASE_DIR, "..", "data")
 RAW_DIR = os.path.join(DATA_DIR, "raw")
 FORECAST_DIR = os.path.join(DATA_DIR, "forecasts")
 REPORT_DIR = os.path.join(DATA_DIR, "reports")
 RISK_DIR = os.path.join(DATA_DIR, "risk")
 
+os.makedirs(RAW_DIR, exist_ok=True)
+os.makedirs(FORECAST_DIR, exist_ok=True)
 os.makedirs(REPORT_DIR, exist_ok=True)
 os.makedirs(RISK_DIR, exist_ok=True)
 
-
+# ============================
+# Run a single stage
+# ============================
 def run_stage(label, script, lat, lon, forecast_days, history_days, quick_mode):
-=======
-# --- FILE PATH HELPERS ---
-DATA_DIR = os.path.join(BASE_DIR, "..", "data")
-RAW_DIR = os.path.join(DATA_DIR, "raw")
-FORECAST_DIR = os.path.join(DATA_DIR, "forecasts")
-MODEL_DIR = os.path.join(DATA_DIR, "models")
-REPORT_DIR = os.path.join(DATA_DIR, "reports")
-os.makedirs(MODEL_DIR, exist_ok=True)
-
-
-def run_stage(label, script, lat, lon, forecast_days, history_days, quick_mode):
-    """Runs one pipeline stage intelligently, skipping or caching if possible."""
->>>>>>> 806c8e1921104feee35ce99ac3e5bd22697574c8
-    print(f"\n==============================")
+    print("\n==============================")
     print(f"{label} ({script})")
     print("==============================")
 
     script_path = os.path.join(BASE_DIR, script)
-<<<<<<< HEAD
 
-=======
->>>>>>> 806c8e1921104feee35ce99ac3e5bd22697574c8
     if not os.path.exists(script_path):
         print(f"❌ Script not found: {script_path}")
         return False
 
-<<<<<<< HEAD
     script_name = os.path.basename(script)
 
-    # ---- SMART SKIP LOGIC (old working behavior) ----
+    # ======================================
+    # QUICK MODE (SKIP IF CACHE EXISTS)
+    # ======================================
     if quick_mode:
-
         if script_name == "fetch_data.py":
-            raw_files = [f for f in os.listdir(RAW_DIR) if f"{lat}_{lon}" in f]
-            if raw_files:
-                print(f"⚡ Using cached RAW data ({len(raw_files)} files)")
+            cached = [f for f in os.listdir(RAW_DIR) if f"{lat}_{lon}" in f]
+            if cached:
+                print(f"⚡ Cached RAW data found → skipping fetch")
                 return True
 
         if script_name == "train_prophet.py":
-            p_files = [f for f in os.listdir(FORECAST_DIR)
-                       if f"forecast_prophet" in f and f"{lat}_{lon}" in f]
-            if p_files:
-                print(f"⚡ Using cached Prophet forecasts")
+            cached = [f for f in os.listdir(FORECAST_DIR)
+                      if "forecast_prophet" in f and f"{lat}_{lon}" in f]
+            if cached:
+                print("⚡ Cached Prophet forecast found → skipping")
                 return True
 
         if script_name == "train_lstm.py":
-            l_files = [f for f in os.listdir(FORECAST_DIR)
-                       if f"forecast_lstm" in f and f"{lat}_{lon}" in f]
-            if l_files:
-                print(f"⚡ Using cached LSTM forecasts")
+            cached = [f for f in os.listdir(FORECAST_DIR)
+                      if "forecast_lstm" in f and f"{lat}_{lon}" in f]
+            if cached:
+                print("⚡ Cached LSTM forecast found → skipping")
                 return True
 
         if script_name == "forecast_and_risk.py":
-            if os.path.exists(os.path.join(RISK_DIR, f"marine_risk_forecast_{lat}_{lon}.csv")):
-                print(f"⚡ Using cached fusion & risk output")
+            risk_file = os.path.join(RISK_DIR, f"marine_risk_forecast_{lat}_{lon}.csv")
+            if os.path.exists(risk_file):
+                print("⚡ Cached risk fusion output found → skipping")
                 return True
 
         if script_name == "llm_report.py":
-            if os.path.exists(os.path.join(REPORT_DIR, f"marine_risk_report_{lat}_{lon}.txt")):
-                print(f"⚡ Report already exists — skipping")
+            report_file = os.path.join(REPORT_DIR, f"marine_risk_report_{lat}_{lon}.txt")
+            if os.path.exists(report_file):
+                print("⚡ Report already exists → skipping")
                 return True
 
-    # ---- Build command ----
+    # ======================================
+    # BUILD COMMAND
+    # ======================================
     cmd = [sys.executable, script_path, "--lat", str(lat), "--lon", str(lon)]
 
     if script_name == "fetch_data.py":
@@ -223,147 +99,69 @@ def run_stage(label, script, lat, lon, forecast_days, history_days, quick_mode):
 
     if script_name in ("train_prophet.py", "train_lstm.py"):
         cmd += ["--forecast_days", str(forecast_days)]
-        if script_name == "train_prophet.py" and quick_mode:
-            cmd += ["--fast_mode"]
-
-    # ---- Execute ----
-    try:
-        start = time.time()
-        subprocess.run(cmd, check=True)
-        print(f"✅ {label} completed in {time.time() - start:.1f}s.")
-        return True
-
-    except subprocess.CalledProcessError as e:
-        print(f"❌ Error in {label}: {e}")
-        return False
-=======
-    # 1️⃣ Determine if we can skip
-    can_skip = False
-    script_name = os.path.basename(script)
-
-    if script_name == "fetch_data.py":
-        # Skip if raw data already exists and is recent
-        cached_files = [f for f in os.listdir(RAW_DIR) if str(lat) in f and str(lon) in f]
-        if cached_files and quick_mode:
-            print(f"⚡ Using cached marine data ({len(cached_files)} files).")
-            return True
-
-    elif script_name == "train_prophet.py":
-        # Skip if prophet forecasts exist
-        cached_forecasts = [f for f in os.listdir(FORECAST_DIR)
-                            if "forecast_prophet" in f and str(lat) in f and str(lon) in f]
-        if cached_forecasts and quick_mode:
-            print(f"⚡ Using cached Prophet forecasts ({len(cached_forecasts)} files).")
-            return True
-
-    elif script_name == "train_lstm.py":
-        cached_forecasts = [f for f in os.listdir(FORECAST_DIR)
-                            if "lstm_forecast" in f and str(lat) in f and str(lon) in f]
-        if cached_forecasts and quick_mode:
-            print(f"⚡ Using cached LSTM forecasts ({len(cached_forecasts)} files).")
-            return True
-
-    elif script_name == "forecast_and_risk.py":
-        risk_file = os.path.join(DATA_DIR, "risk", f"marine_risk_forecast_{lat}_{lon}.csv")
-        if os.path.exists(risk_file) and quick_mode:
-            print(f"⚡ Using cached risk fusion results.")
-            return True
-
-    elif script_name == "llm_report.py":
-        report_file = os.path.join(REPORT_DIR, f"marine_risk_report_{lat}_{lon}.txt")
-        if os.path.exists(report_file) and quick_mode:
-            print(f"⚡ Report already exists — skipping generation.")
-            return True
-
-    # 2️⃣ Run the script
-    cmd = [sys.executable, script_path, "--lat", str(lat), "--lon", str(lon)]
-
-    # Only pass certain args to relevant scripts
-    if script_name == "fetch_data.py":
-        cmd += ["--days", str(history_days)]
-    elif script_name in ("train_prophet.py", "train_lstm.py"):
-        cmd += ["--forecast_days", str(forecast_days)]
         if quick_mode and script_name == "train_prophet.py":
             cmd += ["--fast_mode"]
 
-    start = time.time()
+    # ======================================
+    # EXECUTE
+    # ======================================
     try:
+        start = time.time()
         subprocess.run(cmd, check=True)
-        duration = time.time() - start
-        print(f"✅ {label} completed in {duration:.1f}s.")
+        print(f"✅ {label} completed in {time.time() - start:.1f}s")
         return True
+
     except subprocess.CalledProcessError as e:
-        print(f"❌ Error in {label}: {e}")
+        print(f"❌ Error in stage {label}: {e}")
         return False
+
     except Exception as e:
-        print(f"❌ Unexpected error in {label}: {e}")
+        print(f"❌ Unexpected error in stage {label}: {e}")
         return False
->>>>>>> 806c8e1921104feee35ce99ac3e5bd22697574c8
 
 
+# ============================
+# MAIN PIPELINE
+# ============================
 def main(lat, lon, forecast_days, history_days, quick_mode):
     print("\n==============================")
     print("🌊 SMART-CACHED MARINE RISK PIPELINE")
     print("==============================")
     print(f"Coordinates: ({lat}, {lon})")
-<<<<<<< HEAD
     print(f"Forecast horizon: {forecast_days} days")
     print(f"History window: {history_days} days")
-    print(f"Mode: {'⚡ QUICK' if quick_mode else '🧠 FULL MODE'}")
-=======
-    print(f"Forecast horizon: {forecast_days} days | History window: {history_days} days")
     print(f"Mode: {'⚡ QUICK' if quick_mode else '🧠 FULL TRAIN'}")
->>>>>>> 806c8e1921104feee35ce99ac3e5bd22697574c8
     print("==============================\n")
 
     pipeline_start = time.time()
 
     for label, script in STAGES:
-<<<<<<< HEAD
         ok = run_stage(label, script, lat, lon, forecast_days, history_days, quick_mode)
         if not ok:
-            print(f"⚠️ Pipeline stopped at stage: {label}")
+            print(f"⚠️ Pipeline stopped at: {label}")
             return
 
     print("\n==============================")
     print("✅ PIPELINE COMPLETED SUCCESSFULLY")
     print("==============================")
     print(f"🕒 Total time: {(time.time() - pipeline_start)/60:.2f} minutes")
-=======
-        success = run_stage(label, script, lat, lon, forecast_days, history_days, quick_mode)
-        if not success:
-            print(f"⚠️ Pipeline stopped at stage: {label}")
-            return
-
-    total_time = (time.time() - pipeline_start) / 60
-    print("\n==============================")
-    print("✅ PIPELINE COMPLETED SUCCESSFULLY")
-    print("==============================")
-    print(f"🕒 Total time taken: {total_time:.2f} minutes")
-    print(f"📊 Reports saved in: data/reports/")
-    print(f"🖼️ Plots saved in: data/plots/")
-    print(f"💾 Forecast data saved in: data/forecasts/")
-    print(f"\nReport generated on {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}")
->>>>>>> 806c8e1921104feee35ce99ac3e5bd22697574c8
+    print(f"📊 Reports saved in data/reports/")
+    print(f"🖼️ Plots saved in data/plots/")
+    print(f"💾 Forecast data saved in data/forecasts/")
+    print(f"Report generated on: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}")
     print("==============================\n")
 
 
+# ============================
+# CLI ENTRY
+# ============================
 if __name__ == "__main__":
-<<<<<<< HEAD
     parser = argparse.ArgumentParser(description="Run Marine Risk Prediction Pipeline")
     parser.add_argument("--lat", type=float, required=True)
     parser.add_argument("--lon", type=float, required=True)
     parser.add_argument("--forecast_days", type=int, default=30)
     parser.add_argument("--history_days", type=int, default=60)
     parser.add_argument("--quick_mode", action="store_true")
-=======
-    parser = argparse.ArgumentParser(description="Run optimized marine risk prediction pipeline.")
-    parser.add_argument("--lat", type=float, required=True, help="Latitude coordinate")
-    parser.add_argument("--lon", type=float, required=True, help="Longitude coordinate")
-    parser.add_argument("--forecast_days", type=int, default=30, help="Forecast horizon in days")
-    parser.add_argument("--history_days", type=int, default=60, help="Days of historical data to fetch")
-    parser.add_argument("--quick_mode", action="store_true", help="Enable caching and fast Prophet/LSTM mode")
->>>>>>> 806c8e1921104feee35ce99ac3e5bd22697574c8
     args = parser.parse_args()
 
     main(args.lat, args.lon, args.forecast_days, args.history_days, args.quick_mode)

@@ -79,21 +79,9 @@ h1, h2, h3, h4, h5, h6,
   padding-top: 100px;
 }
 
-<<<<<<< HEAD
-=======
-/* .hero-title {
-  font-size: clamp(3.5rem, 5.5vw, 5.5rem);
-  font-weight: 900;
-  color: #0a0034;
-  margin-bottom: 1.5rem;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  line-height: 1.2;
-} */
-
 /* ================================
-   HERO TITLE HOVER EFFECT
+   HERO TITLE + HOVER EFFECT
 ================================ */
->>>>>>> 806c8e1921104feee35ce99ac3e5bd22697574c8
 .hero-title {
   font-size: clamp(3.5rem, 5.5vw, 5.5rem);
   font-weight: 900;
@@ -101,31 +89,21 @@ h1, h2, h3, h4, h5, h6,
   margin-bottom: 1.5rem;
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   line-height: 1.2;
-<<<<<<< HEAD
-}
-
-=======
   position: relative;
-  transition: all 0.3s ease; /* Smooth transition for hover effect */
+  transition: all 0.3s ease;
 }
 
-/* Hover effect for hero-title */
 .hero-title:hover {
-  color: #ffffff; /* Beautiful color change on hover */
-  transform: translateY(-5px); /* Slight upward movement */
-  text-shadow: 0 30px 30px rgba(0, 8, 255, 0.6); /* Enhanced glowing effect */
+  color: #ffffff;
+  transform: translateY(-5px);
+  text-shadow: 0 30px 30px rgba(0, 8, 255, 0.6);
 }
 
-/* ================================
-   HERO TITLE ACTIVE STATE
-================================ */
 .hero-title:active {
-  transform: translateY(0); /* Reset to normal position when clicked */
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* Regular shadow on active click */
+  transform: translateY(0);
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
-
->>>>>>> 806c8e1921104feee35ce99ac3e5bd22697574c8
 .hero-subtitle {
   font-family: 'Poppins', sans-serif;
   font-size: clamp(1rem, 2vw, 1.35rem);
@@ -166,42 +144,19 @@ h1, h2, h3, h4, h5, h6,
 /* ================================
    FEATURES SECTION
 ================================ */
-
 .features-section {
   width: 100%;
-  min-height: 200vh; /* longer so the image has room to move */
+  min-height: 200vh;
   position: relative;
   background-color: #081838;
   background-image: url('/src/assets/background_ocean.jpg');
   background-size: cover;
   background-position: center top;
   background-repeat: no-repeat;
-  background-attachment: scroll; /* we’ll control scroll effect with JS */
+  background-attachment: scroll;
   padding: 100px 0;
   overflow: hidden;
 }
-
-/* .features-section {
-  width: 100%;
-  min-height: 100vh;
-  position: relative;
-  background-image: url('/src/assets/background_ocean.jpg');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  padding: 100px 0;
-  overflow: hidden;
-} */
-
-/* .features-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 20, 40, 0.85);
-  z-index: 1;
-} */
 
 .features-content {
   position: relative;
