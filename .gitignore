@@ -23,5 +23,5 @@ models/marine_pollution/data/synthetic/
 
 models/risk_prediction/data/
 
-models/human_activity_risk/data/
-models/human_activity_risk/outputs/
+# models/human_activity_risk/
+# models/human_activity_risk/outputs/
