@@ -330,7 +330,7 @@ p, label, input, textarea, select, button {
   overflow: hidden;
 }
 
-.final-cta::before {
+/* .final-cta::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -340,7 +340,7 @@ p, label, input, textarea, select, button {
     rgba(0, 26, 58, 0.6)
   );
   z-index: 1;
-}
+} */
 
 .final-cta .container {
   position: relative;
@@ -350,7 +350,7 @@ p, label, input, textarea, select, button {
 
 .cta-text {
   font-size: 3rem;
-  color: #ffffff;
+  color: #040132;
   max-width: 900px;
   margin: 0 auto 48px;
   line-height: 1.4;
