@@ -1,4 +1,6 @@
+# -----------------------------------
 # Logs
+# -----------------------------------
 logs
 *.log
 npm-debug.log*
@@ -7,51 +9,60 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
+# -----------------------------------
 # Node dependencies
+# -----------------------------------
 node_modules/
 
+# -----------------------------------
 # Build / output
+# -----------------------------------
 dist/
 build/
 .vite/
 .cache/
+.dist/        # <--- IMPORTANT: ignore .dist too
 
-# Local environment files (may contain API keys)
+# -----------------------------------
+# Environment variables
+# -----------------------------------
 .env
 .env.local
 .env.*.local
 
-# Log files
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# Editor / OS
-.vscode/
+# -----------------------------------
+# Editor / OS junk
+# -----------------------------------
+.vscode/*
+!.vscode/extensions.json
 .idea/
 .DS_Store
+*.swp
+*.swo
+*.swn
 
-# Coverage
+# VS / JetBrains / Misc
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# -----------------------------------
+# Coverage reports
+# -----------------------------------
 coverage/
 
-# Optional: lockfiles should be tracked, do NOT ignore:
+# -----------------------------------
+# Python bytecode & caches
+# -----------------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# -----------------------------------
+# Optional: lockfiles (DO NOT ignore these normally)
+# -----------------------------------
 # package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
