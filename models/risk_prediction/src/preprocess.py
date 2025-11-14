@@ -3,6 +3,9 @@ import argparse
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+
 
 # Paths
 BASE_DIR = os.path.dirname(__file__)
@@ -83,6 +86,19 @@ def preprocess_data(lat, lon):
     # Fill missing with interpolation
     merged = merged.sort_values("time").reset_index(drop=True)
     merged = merged.set_index("time").resample("1D").mean().interpolate(limit_direction="both")
+    
+    # Ensure SST is numeric
+    if "sea_surface_temperature_max" in merged.columns:
+        merged["sea_surface_temperature_max"] = pd.to_numeric(
+            merged["sea_surface_temperature_max"], errors="coerce"
+        )
+
+    # If still all NaN, fill with its mean
+    if merged["sea_surface_temperature_max"].isna().all():
+        print("⚠️  No valid SST values — filling with regional mean.")
+        merged["sea_surface_temperature_max"].fillna(
+            merged["sea_surface_temperature_max"].mean(), inplace=True
+        )
 
     # Add derived features
     if "sea_surface_temperature_max" in merged.columns:

@@ -6,7 +6,7 @@ import AquaMind from './pages/AquaMind';
 import Dashboard from './pages/Dashboard';
 import Pollution from './pages/Pollution';
 import Coral from './pages/Pollution';
-import Forecast from './pages/Pollution';
+import Forecast from './pages/RiskPrediction';
 import Activity from './pages/Pollution';
 import Anomalies from './pages/Pollution';
 import MEHI from './pages/Pollution';

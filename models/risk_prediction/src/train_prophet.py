@@ -156,6 +156,9 @@ from prophet.diagnostics import cross_validation, performance_metrics
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+
 
 # === Directories ===
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
@@ -183,7 +186,13 @@ def train_and_forecast_prophet(df, variable, lat, lon, forecast_days=30):
     df = df.rename(columns={"time": "ds", variable: "y"})
     df["ds"] = pd.to_datetime(df["ds"])
 
+    
+
     model = Prophet(daily_seasonality=True)
+    if df.dropna().shape[0] < 2:
+        print(f"⚠️ Skipping Prophet training for {variable} — insufficient data ({df.dropna().shape[0]} valid rows).")
+        return
+
     model.fit(df)
 
     future = model.make_future_dataframe(periods=forecast_days)
@@ -232,5 +241,6 @@ if __name__ == "__main__":
     parser.add_argument("--lat", type=float, required=True)
     parser.add_argument("--lon", type=float, required=True)
     parser.add_argument("--forecast_days", type=int, default=30)
+    parser.add_argument("--fast_mode", action="store_true", help="Enable faster training (skips diagnostics)")
     args = parser.parse_args()
     main(args.lat, args.lon, args.forecast_days)
