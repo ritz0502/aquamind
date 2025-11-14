@@ -209,11 +209,11 @@ def run_pipeline():
         }
         print(f"Pipeline failed with error: {error_details}")
         
-#         return jsonify({
-#             "status": "error",
-#             "message": f"Pipeline execution failed with return code {e.returncode}",
-#             "details": error_details
-#         }), 500
+        return jsonify({
+            "status": "error",
+            "message": f"Pipeline execution failed with return code {e.returncode}",
+            "details": error_details
+        }), 500
         
     except FileNotFoundError as e:
         return jsonify({
@@ -238,11 +238,11 @@ def get_plot():
         lat = request.args.get("lat")
         lon = request.args.get("lon")
         
-#         if not lat or not lon:
-#             return jsonify({
-#                 "status": "error",
-#                 "message": "Missing lat or lon parameter"
-#             }), 400
+        if not lat or not lon:
+            return jsonify({
+                "status": "error",
+                "message": "Missing lat or lon parameter"
+            }), 400
         
         plot_path = os.path.join(DATA_DIR, "plots", f"marine_risk_index_{lat}_{lon}.png")
         
@@ -267,13 +267,12 @@ def get_plot():
         }), 500
 
 
-
-# @app.route("/get_risk_data", methods=["GET"])
-# def get_risk_data():
-#     """Serve the risk data CSV as JSON."""
-#     try:
-#         lat = request.args.get("lat")
-#         lon = request.args.get("lon")
+@app.route("/get_risk_data", methods=["GET"])
+def get_risk_data():
+    """Serve the risk data CSV as JSON."""
+    try:
+        lat = request.args.get("lat")
+        lon = request.args.get("lon")
         
         if not lat or not lon:
             return jsonify({

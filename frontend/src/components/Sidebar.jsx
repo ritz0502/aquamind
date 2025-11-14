@@ -45,22 +45,23 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, isMobile }) => {
   }, []);
 
   const styles = {
-    sidebar: {
-      width: "260px",
-      backgroundColor: "#061a2c",
-      borderRight: "1px solid rgba(0, 180, 216, 0.2)",
-      position: isStuck ? "absolute" : "fixed",
-      top: isStuck ? "auto" : "80px",
-      bottom: isStuck ? "0" : "auto",
-      height: isStuck ? "auto" : "calc(100vh - 80px)",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "space-between",
-      left: isMobile ? (sidebarOpen ? 0 : "-260px") : 0,
-      transition: "all 0.3s ease",
-      zIndex: 99,
-      overflow: "hidden",
-    },
+      sidebar: {
+        width: '260px',
+        backgroundColor: '#061a2c',
+        padding: '30px 20px',
+        paddingBottom: '20px',
+        paddingTop: '0px',
+        borderRight: '1px solid rgba(0, 180, 216, 0.2)',
+        
+        position: 'sticky',
+        top: '60px',
+        height: 'calc(100vh - 80px)',    // navbar height
+        
+        overflowY: 'auto',
+        overflowX: 'hidden',
+
+        zIndex: 10
+      },
     navContainer: {
       flexGrow: 1,
       overflowY: "auto",
