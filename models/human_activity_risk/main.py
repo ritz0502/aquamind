@@ -295,13 +295,15 @@
 
 
 
-
-
-
 import argparse
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+import sys
+import os
+
+# Fix emoji printing on Windows
+sys.stdout.reconfigure(encoding='utf-8')
 
 from data_fetchers.ships import get_ship_density
 from data_fetchers.industries import count_industries
@@ -310,52 +312,8 @@ from data_fetchers.ports import count_near_ports
 from risk_model import train_model, load_model, load_scaler
 from utils.heatmap import create_map
 from utils.recommendations import risk_badge, recommendation
-import os
 
 FEATURE_COLS = ["ports", "industries", "hotels", "ships"]
-
-def generate_dataset(lat_min=8.0, lat_max=22.0, lon_min=72.0, lon_max=88.0, step=2.0):
-    grid = [
-        (round(lat, 6), round(lon, 6))
-        for lat in np.arange(lat_min, lat_max, step)
-        for lon in np.arange(lon_min, lon_max, step)
-    ]
-    rows = []
-    print(f"🗺️ Generating grid of {len(grid)} points...")
-
-    for lat, lon in tqdm(grid, desc="Fetching grid data"):
-        ports_count = count_near_ports(lat, lon)
-        inds = count_industries(lat, lon)
-        hotels_count = count_hotels(lat, lon)
-        ships_count = get_ship_density(lat, lon)
-
-        rows.append([lat, lon, ports_count, inds, hotels_count, ships_count])
-
-    df = pd.DataFrame(rows, columns=["lat", "lon", "ports", "industries", "hotels", "ships"])
-
-    # ---------- Normalize and compute activity_score ----------
-    df_norm = df.copy()
-
-    for col in FEATURE_COLS:
-        col_min = df_norm[col].min()
-        col_max = df_norm[col].max()
-        df_norm[col] = (df_norm[col] - col_min) / (col_max - col_min + 1e-9)
-
-    df_norm["activity_score"] = (
-        df_norm["ports"] * 0.25 +
-        df_norm["industries"] * 0.35 +
-        df_norm["hotels"] * 0.15 +
-        df_norm["ships"] * 0.60
-    ) * 100.0
-
-    for col in FEATURE_COLS:
-        df[col] = df_norm[col]
-    df["activity_score"] = df_norm["activity_score"]
-
-    df.to_csv("activity_dataset.csv", index=False)
-    print("✅ Saved activity_dataset.csv")
-    return df
-
 
 
 def predict_location(model, scaler, lat, lon):
@@ -368,26 +326,27 @@ def predict_location(model, scaler, lat, lon):
     scaled = scaler.transform(raw)
     score = float(model.predict(scaled)[0])
 
+    rec = recommendation(score).replace("\n", " | ")
+
     print(f"\n📍 Location: {lat} {lon}")
     print(f"ports: {ports} | industries: {inds} | hotels: {hotels} | ships: {ships}")
-    print("activity_risk →", round(score, 2))
-    print("risk badge →", risk_badge(score))
-    print("recommendation →", recommendation(score))
+    print(f"activity_risk → {round(score, 2)}")
+    print(f"risk badge → {risk_badge(score)}")
+    print(f"recommendation → {rec}")
+
 
 if __name__ == "__main__":
+
     parser = argparse.ArgumentParser()
-    parser.add_argument("--lat", type=float, default=19.07)
-    parser.add_argument("--lon", type=float, default=72.87)
+    parser.add_argument("--lat", type=float)
+    parser.add_argument("--lon", type=float)
     args = parser.parse_args()
 
-    # Only generate dataset once
-    if not os.path.exists("activity_dataset.csv"):
-        df = generate_dataset(step=2.0)
-        model, scaler = train_model(df)
-        create_map(df)
-    else:
-        df = pd.read_csv("activity_dataset.csv")
-        model = load_model()
-        scaler = load_scaler()
+    df = pd.read_csv("activity_dataset.csv")
+    model = load_model()
+    scaler = load_scaler()
+
+    # ⭐ ADDED FOR HEATMAP — regenerate heatmap every RUN
+    create_map(df, output="../../frontend/public/heatmaps/activity_map.html")
 
     predict_location(model, scaler, args.lat, args.lon)
