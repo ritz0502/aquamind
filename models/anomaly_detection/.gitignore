@@ -1,0 +1,64 @@
+# OS
+Thumbs.db
+Desktop.ini
+
+# Python bytecode / caches
+__pycache__/
+*/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual env (root)
+sst_env/
+.env/
+.venv/
+venv/
+env/
+
+# Project local env/secrets
+sst_anomaly/.env
+*.env
+*.env.*
+
+# Build / metadata
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Logs
+*.log
+
+# Outputs / generated artifacts
+outputs/
+*.joblib
+*.pickle
+*.pkl
+
+
+
+# Keep small CSV samples in sst_anomaly/data
+!sst_anomaly/data/*.csv
+
+# Tool caches
+.pytest_cache/
+.mypy_cache/
+.cache/
+.coverage
+.coverage.*
+
+# Jupyter (if added later)
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# Reports / temp
+tmp/
+temp/
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
