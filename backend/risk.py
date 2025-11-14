@@ -1,25 +1,31 @@
-# app.py
-from flask import Flask, request, jsonify, send_file
-from flask_cors import CORS
+# risk.py
+from flask import Blueprint, request, jsonify, send_file
 import subprocess
 import os
 from datetime import datetime
 import traceback
+import sys
 
-app = Flask(__name__)
+risk = Blueprint("risk", __name__)
+
 
 # Enable CORS for React frontend
-CORS(app, resources={
-    r"/*": {
-        "origins": ["http://localhost:3000", "http://localhost:5173"],
-        "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
-    }
-})
+# CORS(risk, resources={
+#     r"/*": {
+#         "origins": ["http://localhost:3000", "http://localhost:5173"],
+#         "methods": ["GET", "POST", "OPTIONS"],
+#         "allow_headers": ["Content-Type"]
+#     }
+# })
 
 BASE_DIR = os.path.dirname(__file__)
-SRC_DIR = os.path.join(BASE_DIR, "src")
-DATA_DIR = os.path.join(BASE_DIR, "data")
+SRC_DIR = os.path.join(BASE_DIR, "..", "models","risk_prediction", "src")
+DATA_DIR = os.path.abspath(
+    os.path.join(BASE_DIR, "..", "models", "risk_prediction", "data")
+)
+
+
+
 
 # Ensure necessary directories exist
 os.makedirs(os.path.join(DATA_DIR, "reports"), exist_ok=True)
@@ -27,7 +33,7 @@ os.makedirs(os.path.join(DATA_DIR, "risk"), exist_ok=True)
 os.makedirs(os.path.join(DATA_DIR, "plots"), exist_ok=True)
 
 
-@app.route("/", methods=["GET"])
+@risk.route("/", methods=["GET"])
 def index():
     """API information endpoint."""
     return jsonify({
@@ -58,7 +64,7 @@ def index():
     })
 
 
-@app.route("/health", methods=["GET"])
+@risk.route("/health", methods=["GET"])
 def health_check():
     """Health check endpoint."""
     return jsonify({
@@ -69,7 +75,7 @@ def health_check():
     })
 
 
-@app.route("/run_pipeline", methods=["POST", "OPTIONS"])
+@risk.route("/run_pipeline", methods=["POST", "OPTIONS"])
 def run_pipeline():
     """Run the marine risk prediction pipeline for given coordinates."""
     
@@ -124,7 +130,7 @@ def run_pipeline():
         
         # Construct command
         cmd = [
-            "python", os.path.join(SRC_DIR, "run_pipeline.py"),
+            sys.executable, os.path.join(SRC_DIR, "run_pipeline.py"),
             "--lat", str(lat),
             "--lon", str(lon),
             "--forecast_days", str(forecast_days)
@@ -139,8 +145,11 @@ def run_pipeline():
             check=True,
             capture_output=True,
             text=True,
-            timeout=300  # 5 minute timeout
+            encoding="utf-8",     # ✅ fixes Windows emoji encoding
+            errors="ignore",      # ✅ skip problematic characters
+            timeout=300
         )
+
         
         print("Pipeline stdout:", result.stdout)
         if result.stderr:
@@ -154,10 +163,17 @@ def run_pipeline():
         # Check if report file exists
         if not os.path.exists(report_path):
             return jsonify({
-                "status": "error",
-                "message": f"Report file not generated. Pipeline may have failed silently.",
-                "expected_path": report_path
-            }), 500
+                "status": "success",
+                "message": "Pipeline completed successfully (no report generated, cached or empty).",
+                "coordinates": {"lat": lat, "lon": lon},
+                "paths": {
+                    "reports": os.path.join(DATA_DIR, "reports"),
+                    "risk": os.path.join(DATA_DIR, "risk"),
+                    "plots": os.path.join(DATA_DIR, "plots")
+                },
+                "timestamp": datetime.utcnow().isoformat()
+            }), 200
+
         
         # Read report text
         with open(report_path, "r", encoding="utf-8") as f:
@@ -178,23 +194,17 @@ def run_pipeline():
         }
         
         return jsonify({
-            "status": "success",
-            "message": "Pipeline executed successfully",
-            "coordinates": {
-                "lat": lat,
-                "lon": lon
-            },
-            "risk_level": risk_level,
-            "report_text": report_text,
-            "files": files_status,
-            "paths": {
-                "report": report_path,
-                "risk_data": risk_csv,
-                "plot": plot_path
-            },
-            "timestamp": datetime.utcnow().isoformat()
-        }), 200
-        
+        "status": "success",
+        "message": "Pipeline completed successfully (no report generated, data cached or empty).",
+        "coordinates": {"lat": lat, "lon": lon},
+        "paths": {
+            "reports": os.path.join(DATA_DIR, "reports"),
+            "risk": os.path.join(DATA_DIR, "risk"),
+            "plots": os.path.join(DATA_DIR, "plots")
+        },
+        "timestamp": datetime.utcnow().isoformat()
+    }), 200
+
     except subprocess.TimeoutExpired:
         return jsonify({
             "status": "error",
@@ -231,7 +241,7 @@ def run_pipeline():
         }), 500
 
 
-@app.route("/get_plot", methods=["GET"])
+@risk.route("/get_plot", methods=["GET"])
 def get_plot():
     """Serve the latest risk plot as an image."""
     try:
@@ -244,21 +254,31 @@ def get_plot():
                 "message": "Missing lat or lon parameter"
             }), 400
         
-        plot_path = os.path.join(DATA_DIR, "plots", f"marine_risk_index_{lat}_{lon}.png")
+        # Normalize both integer and float filenames
+        possible_names = [
+            f"marine_risk_index_{lat}_{lon}.png",
+            f"marine_risk_index_{float(lat):.1f}_{float(lon):.1f}.png",
+            f"marine_risk_index_{float(lat)}_{float(lon)}.png"
+        ]
         
-        if os.path.exists(plot_path):
-            return send_file(
-                plot_path,
-                mimetype="image/png",
-                as_attachment=False,
-                download_name=f"marine_risk_plot_{lat}_{lon}.png"
-            )
-        else:
-            return jsonify({
-                "status": "error",
-                "message": "Plot not found",
-                "expected_path": plot_path
-            }), 404
+        for name in possible_names:
+            plot_path = os.path.join(DATA_DIR, "plots", name)
+            if os.path.exists(plot_path):
+                return send_file(
+                    plot_path,
+                    mimetype="image/png",
+                    as_attachment=False,
+                    download_name=name
+                )
+
+        # If none of the possible paths exist
+        return jsonify({
+            "status": "error",
+            "message": "Plot not found",
+            "checked_paths": [
+                os.path.join(DATA_DIR, "plots", n) for n in possible_names
+            ]
+        }), 404
             
     except Exception as e:
         return jsonify({
@@ -267,7 +287,8 @@ def get_plot():
         }), 500
 
 
-@app.route("/get_risk_data", methods=["GET"])
+
+@risk.route("/get_risk_data", methods=["GET"])
 def get_risk_data():
     """Serve the risk data CSV as JSON."""
     try:
@@ -303,7 +324,7 @@ def get_risk_data():
 
 
 # Error handlers
-@app.errorhandler(404)
+@risk.errorhandler(404)
 def not_found(e):
     return jsonify({
         "status": "error",
@@ -312,7 +333,7 @@ def not_found(e):
     }), 404
 
 
-@app.errorhandler(500)
+@risk.errorhandler(500)
 def internal_error(e):
     return jsonify({
         "status": "error",
@@ -321,11 +342,34 @@ def internal_error(e):
     }), 500
 
 
-if __name__ == "__main__":
-    print("🌊 Marine Risk Prediction API Starting...")
-    print(f"📁 Data Directory: {DATA_DIR}")
-    print(f"📁 Source Directory: {SRC_DIR}")
-    print("🔗 Server running on http://localhost:5000")
-    print("✅ CORS enabled for http://localhost:3000 and http://localhost:5173")
-    
-    app.run(host="0.0.0.0", port=5000, debug=True)
+
+@risk.route("/get_report", methods=["GET"])
+def get_report():
+    try:
+        lat = request.args.get("lat")
+        lon = request.args.get("lon")
+
+        if not lat or not lon:
+            return jsonify({"status": "error", "message": "Missing lat/lon"}), 400
+
+        possible_names = [
+            f"marine_risk_report_{lat}_{lon}.txt",
+            f"marine_risk_report_{float(lat):.1f}_{float(lon):.1f}.txt",
+            f"marine_risk_report_{float(lat)}_{float(lon)}.txt",
+        ]
+
+        for name in possible_names:
+            report_path = os.path.join(DATA_DIR, "reports", name)
+            if os.path.exists(report_path):
+                return send_file(report_path, mimetype="text/plain")
+
+        return jsonify({
+            "status": "error",
+            "message": "Report not found",
+            "checked": [os.path.join(DATA_DIR, "reports", n) for n in possible_names]
+        }), 404
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+

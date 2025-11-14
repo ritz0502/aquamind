@@ -16,32 +16,52 @@ sys.path.insert(0, MODELS_DIR)
 from flask import Flask
 from flask_cors import CORS
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static")
 CORS(app)
 
-# ------- LOAD ONLY WORKING MODELS -------
+# =======================================
+#  REGISTER ALL AVAILABLE MODEL ROUTES
+# =======================================
 
-# ANOMALY DETECTION
-from anomaly import anomaly_bp
-app.register_blueprint(anomaly_bp, url_prefix="/api/anomalies")
+# -------- ANOMALY DETECTION --------
+try:
+    from anomaly import anomaly_bp
+    app.register_blueprint(anomaly_bp, url_prefix="/api/anomalies")
+    print("✓ Anomaly model loaded")
+except Exception as e:
+    print("✗ Failed to load anomaly model:", e)
 
-# CORAL HEALTH MODEL
-from coral import coral_bp
-app.register_blueprint(coral_bp, url_prefix="/coral")
+# -------- CORAL HEALTH MODEL --------
+try:
+    from coral import coral_bp
+    app.register_blueprint(coral_bp, url_prefix="/coral")
+    print("✓ Coral model loaded")
+except Exception as e:
+    print("✗ Failed to load coral model:", e)
 
-# -------- COMMENTED OUT OLD MODELS --------
-# """
-# from risk import risk
-# from pollution.routes import pollution
+# -------- RISK MODEL --------
+try:
+    from risk import risk
+    app.register_blueprint(risk, url_prefix="/risk")
+    print("✓ Risk model loaded")
+except Exception as e:
+    print("✗ Failed to load risk model:", e)
 
-# app.register_blueprint(risk, url_prefix="/risk")
-# app.register_blueprint(pollution, url_prefix="/pollution")
-# """
+# -------- POLLUTION MODEL --------
+try:
+    from pollution.routes import pollution
+    app.register_blueprint(pollution, url_prefix="/pollution")
+    print("✓ Pollution model loaded")
+except Exception as e:
+    print("✗ Failed to load pollution model:", e)
 
 # -------- ROOT ENDPOINT --------
 @app.route("/")
 def home():
-    return {"message": "Backend running (anomaly + coral models active)"}
+    return {
+        "message": "Backend running",
+        "models": ["anomaly", "coral", "risk", "pollution"]
+    }
 
 # -------- RUN SERVER --------
 if __name__ == "__main__":

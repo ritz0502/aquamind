@@ -1,0 +1,44 @@
+Set-Content -Path .\models\.gitignore -Value @'
+# Model checkpoints and weights
+checkpoints/
+*.pth
+*.pt
+*.ckpt
+*.h5
+*.hdf5
+*.pth.tar
+
+# Large datasets / generated data
+data/
+datasets/
+raw_data/
+processed_data/
+*.npz
+*.npy
+*.tfrecord
+
+# Outputs and evaluation results
+outputs/
+results/
+predictions/
+*.json
+
+# Pickles and caches
+*.pkl
+*.pickle
+
+# Logs / tensorboard
+logs/
+runs/
+tensorboard/
+events.out.*
+
+# Temporary / OS / editor
+*.log
+*.tmp
+.DS_Store
+.vscode/
+.idea/
+__pycache__/
+*.pyc
+'@
