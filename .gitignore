@@ -4,6 +4,10 @@
 # \models\marine_pollution\data\ocean_augmented_dataset\
 # \models\marine_pollution\data\synthetic\
 
+backend/venv/
+venv/
+.env
+__pycache__/
 
 
 
