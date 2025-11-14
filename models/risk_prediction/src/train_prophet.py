@@ -12,7 +12,6 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")
 PROCESSED_DIR = os.path.join(DATA_DIR, "processed")
 FORECAST_DIR = os.path.join(DATA_DIR, "forecasts")
 PLOTS_DIR = os.path.join(DATA_DIR, "plots")
-
 os.makedirs(FORECAST_DIR, exist_ok=True)
 os.makedirs(PLOTS_DIR, exist_ok=True)
 

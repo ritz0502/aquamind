@@ -79,6 +79,21 @@ h1, h2, h3, h4, h5, h6,
   padding-top: 100px;
 }
 
+<<<<<<< HEAD
+=======
+/* .hero-title {
+  font-size: clamp(3.5rem, 5.5vw, 5.5rem);
+  font-weight: 900;
+  color: #0a0034;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  line-height: 1.2;
+} */
+
+/* ================================
+   HERO TITLE HOVER EFFECT
+================================ */
+>>>>>>> 806c8e1921104feee35ce99ac3e5bd22697574c8
 .hero-title {
   font-size: clamp(3.5rem, 5.5vw, 5.5rem);
   font-weight: 900;
@@ -86,8 +101,31 @@ h1, h2, h3, h4, h5, h6,
   margin-bottom: 1.5rem;
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   line-height: 1.2;
+<<<<<<< HEAD
 }
 
+=======
+  position: relative;
+  transition: all 0.3s ease; /* Smooth transition for hover effect */
+}
+
+/* Hover effect for hero-title */
+.hero-title:hover {
+  color: #ffffff; /* Beautiful color change on hover */
+  transform: translateY(-5px); /* Slight upward movement */
+  text-shadow: 0 30px 30px rgba(0, 8, 255, 0.6); /* Enhanced glowing effect */
+}
+
+/* ================================
+   HERO TITLE ACTIVE STATE
+================================ */
+.hero-title:active {
+  transform: translateY(0); /* Reset to normal position when clicked */
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* Regular shadow on active click */
+}
+
+
+>>>>>>> 806c8e1921104feee35ce99ac3e5bd22697574c8
 .hero-subtitle {
   font-family: 'Poppins', sans-serif;
   font-size: clamp(1rem, 2vw, 1.35rem);
