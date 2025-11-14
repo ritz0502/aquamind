@@ -547,16 +547,22 @@ import numpy as np
 from torchvision import transforms, models
 from torchvision.models import efficientnet_b0, EfficientNet_B0_Weights
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+# sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from train_unet import UNet  # or 5_train_unet if needed
+from marine_pollution.scripts.train_unet import UNet
+  # or 5_train_unet if needed
 
 # ====================================================
 # CONFIG
 # ====================================================
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-CHECKPOINT_DIR = "checkpoints"
-OUTPUT_DIR = "outputs"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))   # scripts/
+ROOT_DIR = os.path.dirname(BASE_DIR)                    # marine_pollution/
+
+CHECKPOINT_DIR = os.path.join(ROOT_DIR, "checkpoints")
+OUTPUT_DIR = os.path.join(ROOT_DIR, "outputs")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 print("🚀 Loading models...")

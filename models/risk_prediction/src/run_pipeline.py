@@ -111,6 +111,9 @@ import os
 import time
 import sys
 from datetime import datetime
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+
 
 BASE_DIR = os.path.dirname(__file__)
 

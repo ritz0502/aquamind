@@ -1,0 +1,39 @@
+# Virtual environments
+venv/
+env/
+.venv/
+.Pipfile.lock
+
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / build
+build/
+dist/
+*.egg-info/
+
+# Test / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Local SQLite DBs and runtime data
+*.sqlite3
+*.db
+instance/
+
+# Environment / secrets
+.env
+.env.local
+*.env
+
+# Logs
+*.log
+logs/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
