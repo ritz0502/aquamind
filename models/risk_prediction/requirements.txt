@@ -9,3 +9,5 @@ scikit-learn
 tqdm
 python-dotenv
 openai                 # or `mistral` SDK if using Mistral — adapt accordingly
+xarray netCDF4
+

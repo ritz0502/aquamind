@@ -5,7 +5,7 @@ import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
 import { useOceanInput } from '../context/OceanInputContext';
 import { useModelResults } from '../context/ModelResultsContext';
-import { runModel } from '../api/api';
+//import { runModel } from '../api/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const Activity = () => {
