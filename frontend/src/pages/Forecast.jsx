@@ -1,266 +1,240 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import Sidebar from '../components/Sidebar';
-import Footer from '../components/Footer';
-import { useOceanInput } from '../context/OceanInputContext';
-import { useModelResults } from '../context/ModelResultsContext';
-import { runModel } from '../api/api';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
-const Forecast = () => {
+import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
+import Footer from "../components/Footer";
+
+import { useOceanInput } from "../context/OceanInputContext";   // ← IMPORTANT
+
+const API_BASE_URL = "http://localhost:5000";
+
+function Forecast() {
   const navigate = useNavigate();
-  const { inputs } = useOceanInput();
-  const { updateResult } = useModelResults();
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
+  const { inputs } = useOceanInput();   // ← GET GLOBAL COORDINATES
 
-  const handleRunModel = async () => {
-    setLoading(true);
-    try {
-      const response = await runModel('forecast', inputs);
-      setResult(response);
-      updateResult('forecast', response);
-    } catch (error) {
-      alert('Error running forecast model. Please try again.');
-    } finally {
-      setLoading(false);
+  const [formData, setFormData] = useState({
+    lat: inputs.lat || "",
+    lon: inputs.lon || "",
+    forecast_days: 7,
+    quick_mode: true,
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [results, setResults] = useState(null);
+  const [error, setError] = useState(null);
+  const [plotUrl, setPlotUrl] = useState(null);
+  const [reportText, setReportText] = useState(null);
+
+  const resultsRef = useRef(null);
+
+  // Update form whenever dashboard changes values
+  useEffect(() => {
+    if (inputs.lat && inputs.lon) {
+      setFormData((prev) => ({
+        ...prev,
+        lat: inputs.lat,
+        lon: inputs.lon,
+      }));
     }
+  }, [inputs.lat, inputs.lon]);
+
+  // Auto-run forecast when page loads WITH coordinates
+  useEffect(() => {
+    if (inputs.lat && inputs.lon && !results && !loading) {
+      handleRunForecast();
+    }
+  }, [inputs.lat, inputs.lon]);
+
+  // Progress animation
+  useEffect(() => {
+    if (loading) {
+      setProgress(0);
+      const t = setInterval(() => {
+        setProgress((p) => (p >= 90 ? 90 : p + 10));
+      }, 500);
+      return () => clearInterval(t);
+    }
+  }, [loading]);
+
+  // ========= RUN FORECAST VIA SAME ROUTE AS RISK ========= //
+  const handleRunForecast = async () => {
+    setLoading(true);
+    setError(null);
+    setResults(null);
+    setPlotUrl(null);
+    setReportText(null);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/risk/run_pipeline`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lat: parseFloat(formData.lat),
+          lon: parseFloat(formData.lon),
+          forecast_days: parseInt(formData.forecast_days),
+          quick_mode: formData.quick_mode,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.status === "success") {
+        setProgress(100);
+        setResults(data);
+
+        // FETCH PLOT
+        const plotRes = await fetch(
+          `${API_BASE_URL}/risk/get_plot?lat=${formData.lat}&lon=${formData.lon}`
+        );
+        if (plotRes.ok) {
+          const blob = await plotRes.blob();
+          setPlotUrl(URL.createObjectURL(blob));
+        }
+
+        // FETCH REPORT
+        const reportRes = await fetch(
+          `${API_BASE_URL}/risk/get_report?lat=${formData.lat}&lon=${formData.lon}`
+        );
+        if (reportRes.ok) {
+          setReportText(await reportRes.text());
+        }
+      } else {
+        setError(data.message || "Pipeline failed");
+      }
+    } catch (err) {
+      setError(`Connection error: ${err.message}`);
+    }
+
+    setLoading(false);
   };
 
-  const styles = {
-    pageContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      minHeight: '100vh',
-      background: 'linear-gradient(180deg, #04121f 0%, #061a2c 100%)',
-      color: '#fff'
+  // ========= INLINE CSS ========= //
+  const s = {
+    page: {
+      minHeight: "100vh",
+      background: "linear-gradient(180deg,#04121f,#061a2c)",
+      color: "#fff",
+      display: "flex",
+      flexDirection: "column",
     },
-    mainLayout: {
-      display: 'flex',
-      flex: 1
-    },
-    contentArea: {
-      flex: 1,
-      padding: '2rem',
-      paddingBottom: '100px',
-      paddingTop: '100px'
+    main: { display: "flex", flex: 1 },
+    content: { flex: 1, padding: "2rem", paddingTop: "110px" },
 
+    title: {
+      fontSize: "2.6rem",
+      background: "linear-gradient(90deg,#00b4d8,#0096b8)",
+      WebkitBackgroundClip: "text",
+      WebkitTextFillColor: "transparent",
+      fontFamily: "Merriweather, serif",
     },
-    header: {
-      fontFamily: 'Merriweather, serif',
-      fontSize: '2.5rem',
-      marginBottom: '0.5rem',
-      background: 'linear-gradient(90deg, #00b4d8, #0096b8)',
-      WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      backgroundClip: 'text'
+
+    subtitle: { color: "#90e0ef", fontFamily: "Poppins", marginBottom: "2rem" },
+
+    card: {
+      background: "rgba(6,26,44,0.6)",
+      padding: "1.5rem",
+      borderRadius: "12px",
+      border: "1px solid rgba(0,180,216,0.3)",
+      marginBottom: "2rem",
     },
-    subheader: {
-      fontFamily: 'Poppins, sans-serif',
-      fontSize: '1rem',
-      color: '#90e0ef',
-      marginBottom: '2rem'
+
+    cardTitle: {
+      fontSize: "1.3rem",
+      fontFamily: "Merriweather",
+      color: "#00b4d8",
+      marginBottom: "1rem",
     },
-    section: {
-      background: 'rgba(6, 26, 44, 0.6)',
-      padding: '1.5rem',
-      borderRadius: '12px',
-      border: '1px solid rgba(0, 180, 216, 0.3)',
-      marginBottom: '2rem',
-      boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)'
+
+    plot: { width: "100%", borderRadius: "12px", marginTop: "1rem" },
+
+    report: {
+      whiteSpace: "pre-wrap",
+      background: "#04121f",
+      padding: "1rem",
+      borderRadius: "10px",
+      border: "1px solid #0096b8",
     },
-    sectionTitle: {
-      fontFamily: 'Merriweather, serif',
-      fontSize: '1.3rem',
-      color: '#00b4d8',
-      marginBottom: '1rem'
+
+    btnRow: { display: "flex", gap: "1rem", marginTop: "1rem" },
+
+    btn: {
+      padding: "0.75rem 2rem",
+      borderRadius: "50px",
+      background: "linear-gradient(135deg,#00b4d8,#0096b8)",
+      border: "none",
+      color: "#fff",
+      cursor: "pointer",
+      fontWeight: 600,
     },
-    inputGrid: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-      gap: '1rem'
-    },
-    inputItem: {
-      fontFamily: 'Poppins, sans-serif',
-      fontSize: '0.9rem'
-    },
-    inputLabel: {
-      color: '#90e0ef',
-      marginRight: '0.5rem'
-    },
-    inputValue: {
-      color: '#fff',
-      fontWeight: '500'
-    },
-    buttonGroup: {
-      display: 'flex',
-      gap: '1rem',
-      marginTop: '2rem',
-      flexWrap: 'wrap'
-    },
-    button: {
-      padding: '0.75rem 2rem',
-      fontSize: '1rem',
-      fontFamily: 'Poppins, sans-serif',
-      fontWeight: '600',
-      background: 'linear-gradient(135deg, #00b4d8, #0096b8)',
-      border: 'none',
-      borderRadius: '50px',
-      color: '#fff',
-      cursor: 'pointer',
-      boxShadow: '0 0 15px rgba(0, 180, 216, 0.3)',
-      transition: 'all 0.3s ease'
-    },
-    secondaryButton: {
-      background: 'rgba(0, 180, 216, 0.2)',
-      border: '1px solid rgba(0, 180, 216, 0.5)'
-    },
-    disabledButton: {
-      opacity: 0.5,
-      cursor: 'not-allowed'
-    },
-    resultMetric: {
-      fontSize: '2rem',
-      fontWeight: 'bold',
-      color: '#00b4d8',
-      marginBottom: '1rem',
-      fontFamily: 'Poppins, sans-serif'
-    },
-    resultInsight: {
-      fontSize: '1.1rem',
-      color: '#caf0f8',
-      marginBottom: '2rem',
-      fontFamily: 'Poppins, sans-serif'
-    },
-    chartContainer: {
-      height: '350px',
-      marginTop: '2rem'
-    }
+
+    disabled: { opacity: 0.4, cursor: "not-allowed" },
   };
 
   return (
-    <div style={styles.pageContainer}>
+    <div style={s.page}>
       <Navbar />
-      <div style={styles.mainLayout}>
+
+      <div style={s.main}>
         <Sidebar />
-        <div style={styles.contentArea}>
-          <h1 style={styles.header}>🌊 Ocean Forecast Model</h1>
-          <p style={styles.subheader}>Predicting ocean conditions for the next 7 days</p>
+        <div style={s.content}>
+          <h1 style={s.title}>🌊 Ocean Forecast</h1>
+          <p style={s.subtitle}>Auto-analysis using selected coordinates</p>
 
-          <div style={styles.section}>
-            <h3 style={styles.sectionTitle}>Current Input Parameters</h3>
-            <div style={styles.inputGrid}>
-              <div style={styles.inputItem}>
-                <span style={styles.inputLabel}>Latitude:</span>
-                <span style={styles.inputValue}>{inputs.lat || 'N/A'}</span>
-              </div>
-              <div style={styles.inputItem}>
-                <span style={styles.inputLabel}>Longitude:</span>
-                <span style={styles.inputValue}>{inputs.lon || 'N/A'}</span>
-              </div>
-              <div style={styles.inputItem}>
-                <span style={styles.inputLabel}>Depth:</span>
-                <span style={styles.inputValue}>{inputs.depth ? `${inputs.depth}m` : 'N/A'}</span>
-              </div>
-              <div style={styles.inputItem}>
-                <span style={styles.inputLabel}>Temperature:</span>
-                <span style={styles.inputValue}>{inputs.temperature ? `${inputs.temperature}°C` : 'N/A'}</span>
-              </div>
-              <div style={styles.inputItem}>
-                <span style={styles.inputLabel}>Salinity:</span>
-                <span style={styles.inputValue}>{inputs.salinity ? `${inputs.salinity} PSU` : 'N/A'}</span>
-              </div>
+          {/* RESULTS OR LOADER */}
+          {loading && (
+            <div style={s.card}>
+              <h2 style={s.cardTitle}>Running model... {progress}%</h2>
             </div>
-          </div>
+          )}
 
-          {result && (
-            <div style={styles.section}>
-              <h3 style={styles.sectionTitle}>Forecast Results</h3>
-              <div style={styles.resultMetric}>{result.results?.forecast_summary}</div>
-              <p style={styles.resultInsight}>{result.results?.insight}</p>
-              {result.results?.chartData && (
-                <div style={styles.chartContainer}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={result.results.chartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 180, 216, 0.2)" />
-                      <XAxis dataKey="day" stroke="#90e0ef" />
-                      <YAxis stroke="#90e0ef" />
-                      <Tooltip
-                        contentStyle={{
-                          background: '#04121f',
-                          border: '1px solid #00b4d8',
-                          borderRadius: '8px'
-                        }}
-                      />
-                      <Legend />
-                      <Line type="monotone" dataKey="temperature" stroke="#00b4d8" strokeWidth={2} name="Temp (°C)" />
-                      <Line type="monotone" dataKey="waveHeight" stroke="#90e0ef" strokeWidth={2} name="Wave (m)" />
-                    </LineChart>
-                  </ResponsiveContainer>
+          {error && (
+            <div style={s.card}>
+              <p style={{ color: "#ff6b6b" }}>⚠ {error}</p>
+            </div>
+          )}
+
+          {results && (
+            <div ref={resultsRef}>
+              {/* Plot */}
+              {plotUrl && (
+                <div style={s.card}>
+                  <h2 style={s.cardTitle}>📊 Forecast Plot</h2>
+                  <img src={plotUrl} style={s.plot} />
+                </div>
+              )}
+
+              {/* Report */}
+              {reportText && (
+                <div style={s.card}>
+                  <h2 style={s.cardTitle}>📝 Forecast Report</h2>
+                  <pre style={s.report}>{reportText}</pre>
                 </div>
               )}
             </div>
           )}
 
-          <div style={styles.buttonGroup}>
-            <button
-              style={{ ...styles.button, ...styles.secondaryButton }}
-              onClick={() => navigate('/coral')}
-              onMouseEnter={(e) => {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 0 20px rgba(0, 180, 216, 0.4)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 0 15px rgba(0, 180, 216, 0.3)';
-              }}
-            >
+          {/* Bottom Buttons */}
+          <div style={s.btnRow}>
+            <button style={s.btn} onClick={() => navigate("/coral")}>
               ← Previous
             </button>
+
             <button
-              style={styles.button}
-              onClick={handleRunModel}
-              disabled={loading}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 0 25px rgba(0, 180, 216, 0.5)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 0 15px rgba(0, 180, 216, 0.3)';
-              }}
-            >
-              {loading ? 'Running...' : 'Run Model'}
-            </button>
-            <button
-              style={{
-                ...styles.button,
-                ...(result ? {} : styles.disabledButton)
-              }}
-              onClick={() => navigate('/activity')}
-              disabled={!result}
-              onMouseEnter={(e) => {
-                if (result) {
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 0 25px rgba(0, 180, 216, 0.5)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 0 15px rgba(0, 180, 216, 0.3)';
-              }}
+              style={{ ...s.btn, ...(results ? {} : s.disabled) }}
+              disabled={!results}
+              onClick={() => navigate("/activity")}
             >
               Next →
             </button>
           </div>
         </div>
       </div>
+
       <Footer />
     </div>
   );
-};
+}
 
 export default Forecast;

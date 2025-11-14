@@ -6,7 +6,6 @@ import os
 from models.marine_pollution.scripts.infer_combined import predict
 
 
-
 @pollution.route("/", methods=["GET"])
 def index():
     return jsonify({
@@ -32,6 +31,17 @@ def infer_pollution():
 
         # Run model inference
         result = predict(file)
+
+        # Fix paths to annotated + mask
+        annotated_path = result.get("annotated")
+        mask_path = result.get("mask")
+
+        # Convert absolute Windows paths → relative URLs inside /static
+        if annotated_path:
+            result["annotated"] = "static/" + os.path.basename(annotated_path)
+
+        if mask_path:
+            result["mask"] = "static/" + os.path.basename(mask_path)
 
         return jsonify({
             "status": "success",
