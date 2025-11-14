@@ -15,6 +15,8 @@ import Forecast from "./pages/Forecast";
 import Activity from "./pages/Activity";
 import Anomalies from "./pages/Anomalies";
 import Mehi from "./pages/Mehi";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
 
 function App() {
   return (
@@ -44,7 +46,8 @@ function App() {
             <Route path="/activity" element={<Activity />} />
             <Route path="/anomalies" element={<Anomalies />} />
             <Route path="/mehi" element={<Mehi />} />
-
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
           </Routes>
         </Router>
 

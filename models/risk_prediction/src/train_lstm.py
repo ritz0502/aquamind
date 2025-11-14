@@ -167,6 +167,9 @@ from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import joblib
 import matplotlib.pyplot as plt
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
+
 
 # === Directory Setup ===
 DATA_DIR = os.path.join(os.path.dirname(__file__), "..", "data")

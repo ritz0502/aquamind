@@ -27,7 +27,7 @@ except:
     # fallback if backend folder is not used
     from utils.storage import load
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static")
 CORS(app)
 
 # ==========================================

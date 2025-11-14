@@ -532,6 +532,56 @@
 
 
 
+# def predict(image_path):
+#     img = cv2.imread(image_path)
+#     if img is None:
+#         raise FileNotFoundError(f"Image not found: {image_path}")
+
+#     mask = segment(img)
+#     ys, xs = np.where(mask > 0)
+#     if len(xs) == 0:
+#         print("✅ No pollution detected.")
+#         return
+
+#     x1, x2, y1, y2 = np.min(xs), np.max(xs), np.min(ys), np.max(ys)
+#     crop = img[y1:y2, x1:x2]
+#     feats = extract_features(crop).reshape(1, -1)
+#     pred = clf.predict(feats)[0]
+#     label = label_map.get(pred, "unknown")
+
+#     explanation = {
+#         "plastic": "Detected floating plastic debris — recommended cleanup and recycling.",
+#         "paper": "Paper waste detected — biodegradable, but remove to maintain water clarity.",
+#         "glass": "Glass item detected — remove carefully to prevent harm to marine life.",
+#         "metal": "Metal object found — retrieve safely and recycle.",
+#         "cardboard": "Cardboard detected — likely floating packaging waste.",
+#         "trash": "Mixed trash detected — initiate cleanup."
+#     }.get(label, "Clean water — no visible pollution.")
+
+#     overlay = img.copy()
+#     overlay[mask > 0] = (0.4 * overlay[mask > 0] + 0.6 * np.array([0, 0, 255])).astype(np.uint8)
+#     vis = cv2.addWeighted(img, 0.6, overlay, 0.4, 0)
+#     cv2.putText(vis, f"Detected: {label}", (20, 40),
+#                 cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+
+#     cv2.imwrite(os.path.join(OUTPUT_DIR, "mask.png"), mask)
+#     cv2.imwrite(os.path.join(OUTPUT_DIR, "final_overlay.jpg"), vis)
+#     result = {
+#         "image": image_path,
+#         "type": label,
+#         "explanation": explanation,
+#         "mask": "outputs/mask.png",
+#         "annotated": "outputs/final_overlay.jpg"
+#     }
+
+#     with open(os.path.join(OUTPUT_DIR, "result.json"), "w") as f:
+#         json.dump(result, f, indent=2)
+
+#     print(f"\n✅ Detected: {label}")
+#     print(f"💬 {explanation}")
+#     print("🖼️ Results saved in outputs/")
+
+
 
 # scripts/7_infer_combined_efficientnet.py
 """
@@ -547,16 +597,22 @@ import numpy as np
 from torchvision import transforms, models
 from torchvision.models import efficientnet_b0, EfficientNet_B0_Weights
 
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+# sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from train_unet import UNet  # or 5_train_unet if needed
+from marine_pollution.scripts.train_unet import UNet
+  # or 5_train_unet if needed
 
 # ====================================================
 # CONFIG
 # ====================================================
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-CHECKPOINT_DIR = "checkpoints"
-OUTPUT_DIR = "outputs"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))   # scripts/
+ROOT_DIR = os.path.dirname(BASE_DIR)                    # marine_pollution/
+
+CHECKPOINT_DIR = os.path.join(ROOT_DIR, "checkpoints")
+OUTPUT_DIR = os.path.join(ROOT_DIR, "outputs")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 print("🚀 Loading models...")
@@ -609,76 +665,27 @@ def extract_features(crop):
     with torch.no_grad():
         feats = effnet(tensor).cpu().numpy().flatten()
     return feats
-
-# def predict(image_path):
-#     img = cv2.imread(image_path)
-#     if img is None:
-#         raise FileNotFoundError(f"Image not found: {image_path}")
-
-#     mask = segment(img)
-#     ys, xs = np.where(mask > 0)
-#     if len(xs) == 0:
-#         print("✅ No pollution detected.")
-#         return
-
-#     x1, x2, y1, y2 = np.min(xs), np.max(xs), np.min(ys), np.max(ys)
-#     crop = img[y1:y2, x1:x2]
-#     feats = extract_features(crop).reshape(1, -1)
-#     pred = clf.predict(feats)[0]
-#     label = label_map.get(pred, "unknown")
-
-#     explanation = {
-#         "plastic": "Detected floating plastic debris — recommended cleanup and recycling.",
-#         "paper": "Paper waste detected — biodegradable, but remove to maintain water clarity.",
-#         "glass": "Glass item detected — remove carefully to prevent harm to marine life.",
-#         "metal": "Metal object found — retrieve safely and recycle.",
-#         "cardboard": "Cardboard detected — likely floating packaging waste.",
-#         "trash": "Mixed trash detected — initiate cleanup."
-#     }.get(label, "Clean water — no visible pollution.")
-
-#     overlay = img.copy()
-#     overlay[mask > 0] = (0.4 * overlay[mask > 0] + 0.6 * np.array([0, 0, 255])).astype(np.uint8)
-#     vis = cv2.addWeighted(img, 0.6, overlay, 0.4, 0)
-#     cv2.putText(vis, f"Detected: {label}", (20, 40),
-#                 cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-
-#     cv2.imwrite(os.path.join(OUTPUT_DIR, "mask.png"), mask)
-#     cv2.imwrite(os.path.join(OUTPUT_DIR, "final_overlay.jpg"), vis)
-#     result = {
-#         "image": image_path,
-#         "type": label,
-#         "explanation": explanation,
-#         "mask": "outputs/mask.png",
-#         "annotated": "outputs/final_overlay.jpg"
-#     }
-
-#     with open(os.path.join(OUTPUT_DIR, "result.json"), "w") as f:
-#         json.dump(result, f, indent=2)
-
-#     print(f"\n✅ Detected: {label}")
-#     print(f"💬 {explanation}")
-#     print("🖼️ Results saved in outputs/")
-
-
-
 def predict(input_source):
-    """
-    Run pollution detection on either:
-    - a local file path (string)
-    - or a file object (like Flask upload)
-    """
-    # Handle both file path and uploaded file
+
+    # Correct static folder path:
+    STATIC_DIR = os.path.abspath(
+        os.path.join(BASE_DIR, "..", "..", "..", "backend", "static", "pollution")
+    )
+    os.makedirs(STATIC_DIR, exist_ok=True)
+
+    # handle file or path
     if isinstance(input_source, str):
         img = cv2.imread(input_source)
         if img is None:
             raise FileNotFoundError(f"Image not found: {input_source}")
     else:
-        # Read file bytes from upload
         file_bytes = np.frombuffer(input_source.read(), np.uint8)
         img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
 
+    # segmentation
     mask = segment(img)
     ys, xs = np.where(mask > 0)
+
     if len(xs) == 0:
         return {
             "type": "none",
@@ -687,8 +694,10 @@ def predict(input_source):
             "annotated": None
         }
 
+    # crop polluted region
     x1, x2, y1, y2 = np.min(xs), np.max(xs), np.min(ys), np.max(ys)
     crop = img[y1:y2, x1:x2]
+
     feats = extract_features(crop).reshape(1, -1)
     pred = clf.predict(feats)[0]
     label = label_map.get(pred, "unknown")
@@ -702,26 +711,32 @@ def predict(input_source):
         "trash": "Mixed trash detected — initiate cleanup."
     }.get(label, "Clean water — no visible pollution.")
 
+    # visualization 
     overlay = img.copy()
-    overlay[mask > 0] = (0.4 * overlay[mask > 0] + 0.6 * np.array([0, 0, 255])).astype(np.uint8)
+    overlay[mask > 0] = (
+        0.4 * overlay[mask > 0] + 0.6 * np.array([0, 0, 255])
+    ).astype(np.uint8)
+
     vis = cv2.addWeighted(img, 0.6, overlay, 0.4, 0)
     cv2.putText(vis, f"Detected: {label}", (20, 40),
                 cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
 
-    mask_path = os.path.join(OUTPUT_DIR, "mask.png")
-    overlay_path = os.path.join(OUTPUT_DIR, "final_overlay.jpg")
+    # save outputs
+    mask_path = os.path.join(STATIC_DIR, "mask.png")
+    overlay_path = os.path.join(STATIC_DIR, "final_overlay.jpg")
 
     cv2.imwrite(mask_path, mask)
     cv2.imwrite(overlay_path, vis)
 
-    result = {
+    # return relative URLs (leading slash!)
+    return {
         "type": label,
         "explanation": explanation,
-        "mask": mask_path,
-        "annotated": overlay_path
+        "mask": "/static/pollution/mask.png",
+        "annotated": "/static/pollution/final_overlay.jpg"
     }
 
-    return result
+
 
 # ====================================================
 # ENTRY POINT

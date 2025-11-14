@@ -29,6 +29,11 @@ instance/
 
 # Node
 node_modules/
+# -----------------------------------
+# Logs
+# -----------------------------------
+logs
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -38,9 +43,68 @@ dist/
 build/
 
 # OS
+pnpm-debug.log*
+lerna-debug.log*
+
+# -----------------------------------
+# Node dependencies
+# -----------------------------------
+node_modules/
+
+# -----------------------------------
+# Build / output
+# -----------------------------------
+dist/
+build/
+.vite/
+.cache/
+.dist/        # <--- IMPORTANT: ignore .dist too
+
+# -----------------------------------
+# Environment variables
+# -----------------------------------
+.env
+.env.local
+.env.*.local
+
+# -----------------------------------
+# Editor / OS junk
+# -----------------------------------
+.vscode/*
+!.vscode/extensions.json
+.idea/
 .DS_Store
 Thumbs.db
 
 # Logs
 *.log
 logs/
+*.swp
+*.swo
+*.swn
+
+# VS / JetBrains / Misc
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# -----------------------------------
+# Coverage reports
+# -----------------------------------
+coverage/
+
+# -----------------------------------
+# Python bytecode & caches
+# -----------------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# -----------------------------------
+# Optional: lockfiles (DO NOT ignore these normally)
+# -----------------------------------
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml

@@ -142,4 +142,8 @@ def load_model():
 
 def load_scaler():
     import joblib
+<<<<<<< HEAD
     return joblib.load("activity_scaler.pkl")
+=======
+    return joblib.load("activity_scaler.pkl")
+>>>>>>> 806c8e1921104feee35ce99ac3e5bd22697574c8

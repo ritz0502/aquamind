@@ -1,0 +1,145 @@
+/* ===== PAGE LAYOUT ===== */
+.mehi-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #04121f, #061a2c);
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.mehi-main {
+  display: flex;
+  flex: 1;
+}
+
+.mehi-content {
+  flex: 1;
+  padding: 2rem;
+  padding-top: 100px;
+  padding-bottom: 100px;
+}
+
+/* ===== HEADERS ===== */
+.mehi-title {
+  font-size: 2.6rem;
+  font-family: "Merriweather", serif;
+  background: linear-gradient(90deg, #00b4d8, #0096b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.mehi-subtitle {
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  color: #90e0ef;
+}
+
+/* ===== BUTTONS ===== */
+.mehi-btn {
+  padding: 0.75rem 2rem;
+  border-radius: 50px;
+  font-weight: 600;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.mehi-btn-primary {
+  background: linear-gradient(135deg, #00b4d8, #0096b8);
+  color: white;
+}
+
+.mehi-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(0, 180, 216, 0.5);
+}
+
+.mehi-btn-green {
+  background: linear-gradient(135deg, #00ff87, #00d9ff);
+  color: black;
+  font-weight: bold;
+}
+
+.mehi-btn-download {
+  background: rgba(0, 180, 216, 0.3);
+  border: 1px solid #00b4d8;
+  color: #90e0ef;
+}
+
+.mehi-btn-download:hover {
+  background: rgba(0, 180, 216, 0.5);
+}
+
+.button-row {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+/* ===== SUMMARY GRID ===== */
+.summary-grid {
+  margin-top: 2rem;
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+/* ===== MEHI SCORE BOX ===== */
+.mehi-score-box {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem;
+  background: rgba(0, 200, 255, 0.08);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 180, 216, 0.3);
+}
+
+.mehi-score {
+  font-size: 4rem;
+  font-weight: bold;
+  color: #00eaff;
+}
+
+.mehi-score-label {
+  color: #90e0ef;
+  margin-top: 0.5rem;
+}
+
+/* ===== CARDS ===== */
+.summary-card {
+  background: rgba(6, 26, 44, 0.6);
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 180, 216, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.card-title {
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  color: #00b4d8;
+}
+
+.card-item {
+  margin-bottom: 0.7rem;
+}
+
+.card-label {
+  color: #90e0ef;
+  margin-right: 6px;
+}
+
+.card-value {
+  color: #fff;
+  font-weight: 500;
+}
+
+/* ===== IMAGE STYLING ===== */
+.card-image {
+  width: 100%;
+  margin-top: 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 180, 216, 0.3);
+}

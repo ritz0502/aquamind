@@ -5,8 +5,17 @@ import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
 import { useOceanInput } from '../context/OceanInputContext';
 import { useModelResults } from '../context/ModelResultsContext';
-import { runModel } from '../api/api';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import axios from "axios";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  ReferenceLine
+} from 'recharts';
 
 const Anomalies = () => {
   const navigate = useNavigate();
@@ -17,12 +26,22 @@ const Anomalies = () => {
 
   const handleRunModel = async () => {
     setLoading(true);
+
     try {
-      const response = await runModel('anomalies', inputs);
-      setResult(response);
-      updateResult('anomalies', response);
+      const response = await axios.post(
+        "http://localhost:5000/api/anomalies/run",
+        inputs,
+        { headers: { "Content-Type": "application/json" } }
+      );
+
+      console.log("API RESPONSE:", response.data);
+
+      setResult(response.data);
+      updateResult("anomalies", response.data);
+
     } catch (error) {
-      alert('Error running anomaly detection model. Please try again.');
+      console.error("Anomaly model error:", error);
+      alert("Error running anomaly detection model. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -43,9 +62,8 @@ const Anomalies = () => {
     contentArea: {
       flex: 1,
       padding: '2rem',
-      paddingBottom: '100px',
+      paddingBottom: '220px',   // ⭐ Increased
       paddingTop: '100px'
-
     },
     header: {
       fontFamily: 'Merriweather, serif',
@@ -165,15 +183,21 @@ const Anomalies = () => {
     },
     chartContainer: {
       height: '300px',
-      marginTop: '2rem'
+      minHeight: '300px',
+      width: '100%',
+      minWidth: 0,
+      marginTop: '2rem',
+      marginBottom: '120px'   // ⭐ ADDED
     }
+
   };
 
   const getRiskStyle = (risk) => {
     if (!risk) return styles.riskLow;
     const riskLower = risk.toLowerCase();
     if (riskLower.includes('high')) return styles.riskHigh;
-    if (riskLower.includes('medium') || riskLower.includes('moderate')) return styles.riskMedium;
+    if (riskLower.includes('medium') || riskLower.includes('moderate'))
+      return styles.riskMedium;
     return styles.riskLow;
   };
 
@@ -216,14 +240,17 @@ const Anomalies = () => {
             </div>
           </div>
 
+          {/* ⭐ FULL RESULTS SECTION FIXED */}
           {result && (
             <div style={styles.section}>
               <h3 style={styles.sectionTitle}>Anomaly Detection Results</h3>
+
               <div style={{ ...styles.alertBadge, ...getRiskStyle(result.results?.risk_level) }}>
                 {result.results?.risk_level || 'Unknown Risk'}
               </div>
+
               <p style={styles.resultInsight}>{result.results?.insight}</p>
-              
+
               {result.results?.anomalies && result.results.anomalies.length > 0 && (
                 <div style={styles.anomalyList}>
                   <h4 style={{ ...styles.sectionTitle, fontSize: '1.1rem' }}>Detected Anomalies:</h4>
@@ -235,9 +262,10 @@ const Anomalies = () => {
                 </div>
               )}
 
+              {/* ⭐ FIXED CHART */}
               {result.results?.chartData && (
                 <div style={styles.chartContainer}>
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" aspect={3}>
                     <LineChart data={result.results.chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 180, 216, 0.2)" />
                       <XAxis dataKey="time" stroke="#90e0ef" />
@@ -258,55 +286,28 @@ const Anomalies = () => {
             </div>
           )}
 
+          <div style={{ height: "40px" }}></div>   {/* spacer */}
+
           <div style={styles.buttonGroup}>
             <button
               style={{ ...styles.button, ...styles.secondaryButton }}
               onClick={() => navigate('/activity')}
-              onMouseEnter={(e) => {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 0 20px rgba(0, 180, 216, 0.4)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 0 15px rgba(0, 180, 216, 0.3)';
-              }}
             >
               ← Previous
             </button>
+
             <button
               style={styles.button}
               onClick={handleRunModel}
               disabled={loading}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 0 25px rgba(0, 180, 216, 0.5)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 0 15px rgba(0, 180, 216, 0.3)';
-              }}
             >
               {loading ? 'Running...' : 'Run Model'}
             </button>
+
             <button
-              style={{
-                ...styles.button,
-                ...(result ? {} : styles.disabledButton)
-              }}
+              style={{ ...styles.button, ...(result ? {} : styles.disabledButton) }}
               onClick={() => navigate('/mehi')}
               disabled={!result}
-              onMouseEnter={(e) => {
-                if (result) {
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 0 25px rgba(0, 180, 216, 0.5)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 0 15px rgba(0, 180, 216, 0.3)';
-              }}
             >
               Next →
             </button>

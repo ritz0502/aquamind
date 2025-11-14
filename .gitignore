@@ -1,27 +1,66 @@
-# \models\marine_pollution\training_dataset\
-# \models\marine_pollution\data\clean_background\
-# \models\marine_pollution\data\clean_crops\
-# \models\marine_pollution\data\ocean_augmented_dataset\
-# \models\marine_pollution\data\synthetic\
-
+# ================================
+# PYTHON VIRTUAL ENVIRONMENTS
+# ================================
 backend/venv/
 venv/
+sst_env/
+env311/
 .env
+*.env
+
+# ================================
+# PYTHON CACHE & BUILD
+# ================================
 __pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
 
+# ================================
+# FRONTEND (Node / Vite)
+# ================================
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+*.log
 
+# ================================
+# MODEL WEIGHTS (optional, large)
+# ================================
+*.h5
+*.pb
 
-
+# ================================
+# RISK PREDICTION
+# ================================
 models/risk_prediction/.env
-# Ignore marine pollution datasets
+models/risk_prediction/data/
+
+# ================================
+# MARINE POLLUTION DATASETS
+# ================================
 models/marine_pollution/training_dataset/
-models/marine_pollution/data/clean_backgrounds/
+models/marine_pollution/data/clean_background/
 models/marine_pollution/data/clean_crops/
 models/marine_pollution/data/ocean_augmented_dataset/
 models/marine_pollution/data/synthetic/
 
-
-models/risk_prediction/data/
-
+# ================================
+# HUMAN ACTIVITY RISK (commented)
+# ================================
 # models/human_activity_risk/
 # models/human_activity_risk/outputs/
+
+# ================================
+# OS & EDITOR FILES
+# ================================
+.DS_Store
+Thumbs.db
+
+*.exe
+nul
+backend/python311_installer.exe
+
