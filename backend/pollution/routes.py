@@ -5,6 +5,10 @@ import os
 # Import model inference
 from models.marine_pollution.scripts.infer_combined import predict
 
+# NEW: Import JSON storage + MEHI calculator
+from backend.utils.storage import load, save
+from backend.utils.mehi import calculate_mehi
+
 
 @pollution.route("/", methods=["GET"])
 def index():
@@ -43,9 +47,32 @@ def infer_pollution():
         if mask_path:
             result["mask"] = "static/" + os.path.basename(mask_path)
 
+        # ----------------------------------------------------------
+        # 🔵 NEW: Store pollution output + update MEHI JSON
+        # ----------------------------------------------------------
+        data = load()  # load existing combined outputs
+
+        data["pollution"] = result  # save pollution result
+
+        # ensure coral exists (dummy placeholder for now)
+        if "coral" not in data:
+            data["coral"] = {"health_score": 0.7}
+
+        # ensure risk exists
+        if "risk" not in data:
+            data["risk"] = {"risk_level": "Medium"}
+
+        # calculate MEHI
+        data["mehi"] = calculate_mehi(data)
+
+        # save everything back
+        save(data)
+        # ----------------------------------------------------------
+
         return jsonify({
             "status": "success",
-            "prediction": result
+            "prediction": result,
+            "mehi": data["mehi"]    # return MEHI in API response
         })
 
     except Exception as e:

@@ -13,8 +13,11 @@ sys.path.insert(0, ROOT_DIR)
 sys.path.insert(0, MODELS_DIR)
 
 # ------- FLASK SETUP --------
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
+
+# NEW: storage import
+from backend.utils.storage import load
 
 app = Flask(__name__, static_folder="static")
 CORS(app)
@@ -55,6 +58,7 @@ try:
 except Exception as e:
     print("✗ Failed to load pollution model:", e)
 
+
 # -------- ROOT ENDPOINT --------
 @app.route("/")
 def home():
@@ -62,6 +66,34 @@ def home():
         "message": "Backend running",
         "models": ["anomaly", "coral", "risk", "pollution"]
     }
+
+
+# -------- NEW: SUMMARY ENDPOINT --------
+@app.route("/summary", methods=["GET"])
+def summary():
+    """
+    Returns combined outputs of all models:
+    - risk
+    - pollution
+    - coral
+    - mehi
+    """
+    data = load()
+
+    # ensure coral exists
+    if "coral" not in data:
+        data["coral"] = {"health_score": 0.7}
+
+    # ensure risk exists
+    if "risk" not in data:
+        data["risk"] = {"risk_level": "Unknown"}
+
+    # ensure pollution exists
+    if "pollution" not in data:
+        data["pollution"] = {}
+
+    return jsonify(data)
+
 
 # -------- RUN SERVER --------
 if __name__ == "__main__":

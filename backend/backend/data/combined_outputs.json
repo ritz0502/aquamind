@@ -1,0 +1,21 @@
+{
+    "risk": {
+        "risk_level": "Low",
+        "coordinates": {
+            "lat": 15.0,
+            "lon": 75.0
+        },
+        "report_path": "E:\\aquamind\\models\\risk_prediction\\data\\reports\\marine_risk_report_15.0_75.0.txt",
+        "plot_path": "E:\\aquamind\\models\\risk_prediction\\data\\plots\\marine_risk_index_15.0_75.0.png"
+    },
+    "pollution": {
+        "type": "plastic",
+        "explanation": "Detected floating plastic debris \u2014 recommended cleanup and recycling.",
+        "mask": "static/mask.png",
+        "annotated": "static/final_overlay.jpg"
+    },
+    "coral": {
+        "health_score": 0.7
+    },
+    "mehi": 0.77
+}
