@@ -21,17 +21,17 @@ const Dashboard = () => {
     });
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        updateInput('imageUrl', reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  // const handleImageUpload = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     setImageFile(file);
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       updateInput('imageUrl', reader.result);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
   const handleAnalyze = () => {
     if (!inputs.lat || !inputs.lon || !inputs.depth || !inputs.salinity || !inputs.temperature || !inputs.pH) {
@@ -278,15 +278,7 @@ const Dashboard = () => {
                   placeholder="e.g., 8.1"
                 />
               </div>
-              <div style={styles.inputGroup}>
-                <label style={styles.label}>Coral Image (Optional)</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  style={styles.fileInput}
-                  onChange={handleImageUpload}
-                />
-              </div>
+              
             </div>
 
             <button

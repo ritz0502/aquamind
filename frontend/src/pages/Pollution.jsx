@@ -1,55 +1,36 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import Footer from "../components/Footer";
 
-import { useOceanInput } from "../context/OceanInputContext";
 import { useModelResults } from "../context/ModelResultsContext";
 
 const API_BASE_URL = "http://localhost:5000";
 
 function Pollution() {
   const navigate = useNavigate();
-  const { inputs } = useOceanInput();       
   const { updateResult } = useModelResults();
 
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
-
-  // Convert base64 → Blob
-  const base64ToBlob = (base64) => {
-    const arr = base64.split(",");
-    const mime = arr[0].match(/:(.*?);/)[1];
-    const bstr = atob(arr[1]);
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) u8arr[n] = bstr.charCodeAt(n);
-    return new Blob([u8arr], { type: mime });
-  };
-
-  // Auto-run model when page loads
-  useEffect(() => {
-    if (!inputs.imageUrl) {
-      setError("No image found. Please upload an image on the Dashboard.");
-      return;
-    }
-    runModel();
-  }, []);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const runModel = async () => {
+    if (!selectedFile) {
+      setError("Please upload an image");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setResult(null);
 
     try {
-      const blob = base64ToBlob(inputs.imageUrl);
-      const file = new File([blob], "ocean.jpg", { type: blob.type });
-
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", selectedFile);
 
       const response = await fetch(`${API_BASE_URL}/pollution/infer`, {
         method: "POST",
@@ -109,7 +90,6 @@ function Pollution() {
       fontWeight: 600,
       marginRight: "1rem",
     },
-    disabled: { opacity: 0.4, cursor: "not-allowed" },
     error: { color: "#ff6b6b", marginTop: "1rem" },
   };
 
@@ -122,26 +102,38 @@ function Pollution() {
 
         <div style={s.content}>
           <h1 style={s.title}>🏭 Marine Pollution Detection</h1>
-          <p style={s.subtitle}>Analyzing your uploaded ocean image…</p>
+          <p style={s.subtitle}>Upload an ocean image to analyze</p>
 
-          {/* LOADING */}
+          {/* Upload Input */}
+          <div style={s.card}>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setSelectedFile(e.target.files[0])}
+              style={{ marginBottom: "1rem" }}
+            />
+
+            <button
+              style={s.btn}
+              onClick={runModel}
+              disabled={!selectedFile}
+            >
+              Run Pollution Detection
+            </button>
+          </div>
+
           {loading && (
             <div style={s.card}>
               <h2 style={s.cardTitle}>Running Model… Please wait</h2>
             </div>
           )}
 
-          {/* ERROR */}
           {error && (
             <div style={s.card}>
               <p style={s.error}>⚠ {error}</p>
-              <button style={s.btn} onClick={() => navigate("/dashboard")}>
-                ← Go Back
-              </button>
             </div>
           )}
 
-          {/* RESULT */}
           {result && (
             <div style={s.card}>
               <h2 style={s.cardTitle}>Prediction Result</h2>
@@ -153,12 +145,10 @@ function Pollution() {
                 <>
                   <h3 style={s.cardTitle}>Annotated Output</h3>
                   <img
-  src={`${API_BASE_URL}/static/pollution/final_overlay.jpg?v=${Date.now()}`}
-  alt="Annotated Output"
-  style={s.img}
-/>
-
-
+                    src={`${API_BASE_URL}/static/pollution/final_overlay.jpg?v=${Date.now()}`}
+                    alt="Annotated Output"
+                    style={s.img}
+                  />
                 </>
               )}
 

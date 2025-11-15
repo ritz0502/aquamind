@@ -302,6 +302,8 @@ import argparse
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+from utils.heatmap import create_map
+
 
 from data_fetchers.ships import get_ship_density
 from data_fetchers.industries import count_industries
@@ -311,6 +313,10 @@ from risk_model import train_model, load_model, load_scaler
 from utils.heatmap import create_map
 from utils.recommendations import risk_badge, recommendation
 import os
+import sys
+
+sys.stdout.reconfigure(encoding='utf-8')
+
 
 FEATURE_COLS = ["ports", "industries", "hotels", "ships"]
 
@@ -373,6 +379,10 @@ def predict_location(model, scaler, lat, lon):
     print("activity_risk →", round(score, 2))
     print("risk badge →", risk_badge(score))
     print("recommendation →", recommendation(score))
+    # 🔥 Generate heatmap file
+    create_map(args.lat, args.lon, score)
+    print("🔥 Heatmap generated for frontend")
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -390,4 +400,17 @@ if __name__ == "__main__":
         model = load_model()
         scaler = load_scaler()
 
+    # ---- Prediction ----
     predict_location(model, scaler, args.lat, args.lon)
+
+    # ---- 🔥 Generate Heatmap ----
+    print("\n🔥 Generating Heatmap…")
+    create_map(args.lat, args.lon, float(model.predict(
+        scaler.transform([[ 
+            count_near_ports(args.lat, args.lon),
+            count_industries(args.lat, args.lon),
+            count_hotels(args.lat, args.lon),
+            get_ship_density(args.lat, args.lon)
+        ]])
+    )[0]))
+    print("🔥 Heatmap generated successfully!")

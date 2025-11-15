@@ -5,29 +5,55 @@ import Sidebar from '../components/Sidebar';
 import Footer from '../components/Footer';
 import { useOceanInput } from '../context/OceanInputContext';
 import { useModelResults } from '../context/ModelResultsContext';
-//import { runModel } from '../api/api';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+// ✅ Correct environment variable
+const BACKEND_BASE =
+  import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
 const Activity = () => {
   const navigate = useNavigate();
   const { inputs } = useOceanInput();
   const { updateResult } = useModelResults();
+
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
 
+  // ----------------------------------
+  // RUN MODEL (Flask API Integration)
+  // ----------------------------------
   const handleRunModel = async () => {
+    if (!inputs.lat || !inputs.lon) {
+      alert("Latitude and longitude are required.");
+      return;
+    }
+
     setLoading(true);
     try {
-      const response = await runModel('activity', inputs);
-      setResult(response);
-      updateResult('activity', response);
+      const response = await fetch(`${BACKEND_BASE}/activity/run`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          lat: parseFloat(inputs.lat),
+          lon: parseFloat(inputs.lon),
+        }),
+      });
+
+      if (!response.ok) throw new Error("Model execution failed");
+      const data = await response.json();
+
+      setResult(data);
+      updateResult("activity", data); // store in global context
     } catch (error) {
-      alert('Error running activity model. Please try again.');
+      console.error(error);
+      alert("Error connecting to backend or running the model.");
     } finally {
       setLoading(false);
     }
   };
 
+  // ----------------------------------
+  // STYLES
+  // ----------------------------------
   const styles = {
     pageContainer: {
       display: 'flex',
@@ -36,16 +62,12 @@ const Activity = () => {
       background: 'linear-gradient(180deg, #04121f 0%, #061a2c 100%)',
       color: '#fff'
     },
-    mainLayout: {
-      display: 'flex',
-      flex: 1
-    },
+    mainLayout: { display: 'flex', flex: 1 },
     contentArea: {
       flex: 1,
       padding: '2rem',
       paddingBottom: '100px',
       paddingTop: '100px'
-
     },
     header: {
       fontFamily: 'Merriweather, serif',
@@ -53,8 +75,7 @@ const Activity = () => {
       marginBottom: '0.5rem',
       background: 'linear-gradient(90deg, #00b4d8, #0096b8)',
       WebkitBackgroundClip: 'text',
-      WebkitTextFillColor: 'transparent',
-      backgroundClip: 'text'
+      WebkitTextFillColor: 'transparent'
     },
     subheader: {
       fontFamily: 'Poppins, sans-serif',
@@ -68,7 +89,7 @@ const Activity = () => {
       borderRadius: '12px',
       border: '1px solid rgba(0, 180, 216, 0.3)',
       marginBottom: '2rem',
-      boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)'
+      boxShadow: '0 4px 15px rgba(0,0,0,0.3)'
     },
     sectionTitle: {
       fontFamily: 'Merriweather, serif',
@@ -81,18 +102,11 @@ const Activity = () => {
       gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
       gap: '1rem'
     },
-    inputItem: {
-      fontFamily: 'Poppins, sans-serif',
-      fontSize: '0.9rem'
-    },
-    inputLabel: {
-      color: '#90e0ef',
-      marginRight: '0.5rem'
-    },
-    inputValue: {
-      color: '#fff',
-      fontWeight: '500'
-    },
+    inputItem: { fontFamily: 'Poppins, sans-serif', fontSize: '0.9rem' },
+    inputLabel: { color: '#90e0ef', marginRight: '0.5rem' },
+    inputValue: { color: '#fff', fontWeight: '500' },
+
+    // BUTTONS
     buttonGroup: {
       display: 'flex',
       gap: '1rem',
@@ -109,63 +123,57 @@ const Activity = () => {
       borderRadius: '50px',
       color: '#fff',
       cursor: 'pointer',
-      boxShadow: '0 0 15px rgba(0, 180, 216, 0.3)',
+      boxShadow: '0 0 15px rgba(0,180,216,0.3)',
       transition: 'all 0.3s ease'
     },
-    secondaryButton: {
-      background: 'rgba(0, 180, 216, 0.2)',
-      border: '1px solid rgba(0, 180, 216, 0.5)'
-    },
-    disabledButton: {
-      opacity: 0.5,
-      cursor: 'not-allowed'
-    },
+    disabledButton: { opacity: 0.5, cursor: 'not-allowed' },
+
+    // METRICS GRID
     metricsGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+      gridTemplateColumns: 'repeat(3, 1fr)',
       gap: '1.5rem',
       marginBottom: '2rem'
     },
     metricCard: {
       background: 'rgba(0, 180, 216, 0.1)',
-      padding: '1rem',
-      borderRadius: '8px',
-      border: '1px solid rgba(0, 180, 216, 0.3)',
-      textAlign: 'center'
+      padding: '1rem 1.5rem',
+      borderRadius: '10px',
+      border: '1px solid rgba(0,180,216,0.3)',
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center'
     },
     metricValue: {
-      fontSize: '2.5rem',
-      fontWeight: 'bold',
+      fontSize: '1.6rem',
+      fontWeight: '700',
       color: '#00b4d8',
-      fontFamily: 'Poppins, sans-serif'
+      fontFamily: 'Poppins'
     },
     metricLabel: {
       fontSize: '0.9rem',
       color: '#90e0ef',
-      marginTop: '0.5rem',
-      fontFamily: 'Poppins, sans-serif'
+      marginTop: '0.5rem'
     },
     resultInsight: {
       fontSize: '1.1rem',
       color: '#caf0f8',
-      marginBottom: '2rem',
-      fontFamily: 'Poppins, sans-serif'
-    },
-    chartContainer: {
-      height: '300px',
-      marginTop: '2rem'
+      marginBottom: '1rem'
     }
   };
 
   return (
     <div style={styles.pageContainer}>
       <Navbar />
+
       <div style={styles.mainLayout}>
         <Sidebar />
+
         <div style={styles.contentArea}>
           <h1 style={styles.header}>🚢 Human Activity Analysis</h1>
-          <p style={styles.subheader}>Monitoring shipping traffic, tourism, and marine activity</p>
+          <p style={styles.subheader}>Monitoring human-linked coastal activity & risk intensity.</p>
 
+          {/* Input Parameters */}
           <div style={styles.section}>
             <h3 style={styles.sectionTitle}>Current Input Parameters</h3>
             <div style={styles.inputGrid}>
@@ -180,104 +188,95 @@ const Activity = () => {
             </div>
           </div>
 
+          {/* Model Results */}
           {result && (
             <div style={styles.section}>
-              <h3 style={styles.sectionTitle}>Activity Analysis Results</h3>
+              <h3 style={styles.sectionTitle}>Activity Risk Model Results</h3>
+
               <div style={styles.metricsGrid}>
                 <div style={styles.metricCard}>
-                  <div style={styles.metricValue}>{result.results?.ships_detected || 0}</div>
-                  <div style={styles.metricLabel}>Ships Detected</div>
+                  <div style={styles.metricValue}>
+                    {result.score?.toFixed(1)}
+                  </div>
+                  <div style={styles.metricLabel}>Risk Score</div>
                 </div>
+
                 <div style={styles.metricCard}>
-                  <div style={styles.metricValue}>{result.results?.ports_nearby || 0}</div>
+                  <div style={styles.metricValue}>{result.badge}</div>
+                  <div style={styles.metricLabel}>Badge</div>
+                </div>
+
+                <div style={styles.metricCard}>
+                  <div style={styles.metricValue}>{result.features?.ports}</div>
                   <div style={styles.metricLabel}>Nearby Ports</div>
                 </div>
+
                 <div style={styles.metricCard}>
-                  <div style={styles.metricValue}>{result.results?.tourism_density || 0}</div>
-                  <div style={styles.metricLabel}>Tourism Density</div>
+                  <div style={styles.metricValue}>{result.features?.industries}</div>
+                  <div style={styles.metricLabel}>Industries</div>
+                </div>
+
+                <div style={styles.metricCard}>
+                  <div style={styles.metricValue}>{result.features?.hotels}</div>
+                  <div style={styles.metricLabel}>Hotels</div>
+                </div>
+
+                <div style={styles.metricCard}>
+                  <div style={styles.metricValue}>{result.features?.ships}</div>
+                  <div style={styles.metricLabel}>Ships Density</div>
                 </div>
               </div>
-              <p style={styles.resultInsight}>{result.results?.insight}</p>
-              {result.results?.chartData && (
-                <div style={styles.chartContainer}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={result.results.chartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(0, 180, 216, 0.2)" />
-                      <XAxis dataKey="category" stroke="#90e0ef" />
-                      <YAxis stroke="#90e0ef" />
-                      <Tooltip
-                        contentStyle={{
-                          background: '#04121f',
-                          border: '1px solid #00b4d8',
-                          borderRadius: '8px'
-                        }}
-                      />
-                      <Bar dataKey="count" fill="#00b4d8" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
+
+              {/* Recommendation */}
+              <p
+                style={styles.resultInsight}
+                dangerouslySetInnerHTML={{
+                  __html: result.recommendation
+                    .replace(/\|/g, "")
+                    .replace(/-\s*/g, "• ")
+                    .replace(/\.\s+/g, ".<br><br>")
+                }}
+              ></p>
+
+              {/* Heatmap */}
+              {/* Heatmap */}
+<iframe
+  key={Date.now()}
+  src={`${BACKEND_BASE}/heatmaps/activity_map.html?t=${Date.now()}`}
+  style={{
+    width: "100%",
+    height: "500px",
+    border: "none",
+    borderRadius: "12px",
+    marginTop: "20px",
+    background: "#fff"
+  }}
+  title="activity-map"
+/>
+
+
             </div>
           )}
 
+          {/* Run Button */}
           <div style={styles.buttonGroup}>
-            <button
-              style={{ ...styles.button, ...styles.secondaryButton }}
-              onClick={() => navigate('/forecast')}
-              onMouseEnter={(e) => {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 0 20px rgba(0, 180, 216, 0.4)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 0 15px rgba(0, 180, 216, 0.3)';
-              }}
-            >
-              ← Previous
-            </button>
-            <button
-              style={styles.button}
-              onClick={handleRunModel}
-              disabled={loading}
-              onMouseEnter={(e) => {
-                if (!loading) {
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 0 25px rgba(0, 180, 216, 0.5)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 0 15px rgba(0, 180, 216, 0.3)';
-              }}
-            >
-              {loading ? 'Running...' : 'Run Model'}
-            </button>
             <button
               style={{
                 ...styles.button,
-                ...(result ? {} : styles.disabledButton)
+                ...(loading ? styles.disabledButton : {}),
               }}
-              onClick={() => navigate('/anomalies')}
-              disabled={!result}
-              onMouseEnter={(e) => {
-                if (result) {
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 0 25px rgba(0, 180, 216, 0.5)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 0 15px rgba(0, 180, 216, 0.3)';
-              }}
+              onClick={handleRunModel}
+              disabled={loading}
             >
-              Next →
+              {loading ? "Running..." : "Run Model"}
             </button>
           </div>
         </div>
       </div>
+
       <Footer />
     </div>
   );
 };
 
-export default Activity;  
+export default Activity;

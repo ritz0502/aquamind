@@ -1,36 +1,76 @@
 import folium
 from folium.plugins import HeatMap
-from utils.recommendations import risk_badge, recommendation
+import os
 
-def create_map(df, output="activity_map.html", center=[15.0,78.0], zoom_start=5):
-    """
-    df must contain columns: lat, lon, activity_score
-    Creates heatmap + marker layer with badge + recommendation popups.
-    """
-    m = folium.Map(location=center, zoom_start=zoom_start)
+def create_map(lat, lon, activity_intensity=50):
 
-    # Heatmap uses rows of [lat, lon, weight]
-    heat_data = df[["lat", "lon", "activity_score"]].values.tolist()
-    HeatMap(heat_data, radius=22, blur=15, max_zoom=6).add_to(m)
+    print("\n======================")
+    print(" HEATMAP DEBUG OUTPUT ")
+    print("======================\n")
 
-    # Markers with badges
-    for _, row in df.iterrows():
-        score = float(row["activity_score"])
-        color = "green" if score < 30 else ("orange" if score < 70 else "red")
-        popup_html = f"""
-        <b>Location:</b> {row['lat']:.4f}, {row['lon']:.4f}<br>
-        <b>Activity Score:</b> {score:.1f}<br>
-        <b>Risk:</b> {risk_badge(score)}<br><br>
-        <b>Recommendation:</b><br>{recommendation(score)}
+    # Where is this file located?
+    print("heatmap.py location:", os.path.dirname(__file__))
+
+    # Move up 3 levels → project root
+    project_root = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "..", "..", "..")
+    )
+    print("project_root:", project_root)
+
+    # backend folder location
+    backend_dir = os.path.join(project_root, "backend")
+    print("backend_dir:", backend_dir)
+
+    # final heatmaps folder
+    heatmap_dir = os.path.join(backend_dir, "heatmaps")
+    print("heatmap_dir:", heatmap_dir)
+
+    # Create folder if missing
+    os.makedirs(heatmap_dir, exist_ok=True)
+
+    # Final heatmap path
+    output_path = os.path.join(heatmap_dir, "activity_map.html")
+    print("FINAL OUTPUT PATH:", output_path)
+
+    # ----------------------------
+    # Generate map
+    # ----------------------------
+    m = folium.Map(location=[lat, lon], zoom_start=10, tiles=None)
+
+    folium.TileLayer(
+        tiles="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        attr="© OpenStreetMap",
+        control=False
+    ).add_to(m)
+
+    folium.CircleMarker([lat, lon], radius=10, color="red", fill=True).add_to(m)
+    HeatMap([[lat, lon, activity_intensity]]).add_to(m)
+
+    html = m.get_root().render()
+
+    html = html.replace(
+        "</head>",
         """
-        folium.CircleMarker(
-            location=[row["lat"], row["lon"]],
-            radius=6,
-            color=color,
-            fill=True,
-            fill_opacity=0.9,
-            popup=folium.Popup(popup_html, max_width=350)
-        ).add_to(m)
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"/>
+        <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+        </head>
+        """
+    )
 
-    m.save(output)
-    print(f"🗺️ Map saved → {output}")
+    # Write file
+    try:
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(html)
+        print("✔ File written successfully.")
+    except Exception as e:
+        print("❌ Failed to write file:", e)
+
+    # Verify existence
+    if os.path.exists(output_path):
+        print("✔ File EXISTS after writing.")
+    else:
+        print("❌ File DOES NOT EXIST after writing!")
+
+    print("\n======================\n")
+
+    return "/heatmaps/activity_map.html"

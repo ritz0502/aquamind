@@ -1,6 +1,9 @@
 import sys
 import os
 
+
+from flask import send_from_directory
+
 # ------- PATH CONFIG ---------
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 MODELS_DIR = os.path.join(ROOT_DIR, "models")
@@ -58,13 +61,21 @@ try:
 except Exception as e:
     print("✗ Failed to load pollution model:", e)
 
+# -------- HUMAN ACTIVITY MODEL --------
+try:
+    from human_activity import human_activity_bp
+    app.register_blueprint(human_activity_bp, url_prefix="/activity")
+    print("✓ Human Activity model loaded")
+except Exception as e:
+    print("✗ Failed to load Human Activity model:", e)
+
 
 # -------- ROOT ENDPOINT --------
 @app.route("/")
 def home():
     return {
         "message": "Backend running",
-        "models": ["anomaly", "coral", "risk", "pollution"]
+        "models": ["anomaly", "coral", "risk", "pollution", "activity"]
     }
 
 
@@ -92,7 +103,18 @@ def summary():
     if "pollution" not in data:
         data["pollution"] = {}
 
+    # ensure human activity exists
+    if "activity" not in data:
+        data["activity"] = {"impact_score": "Unknown"}
+
     return jsonify(data)
+
+
+@app.route("/heatmaps/<path:filename>")
+def serve_heatmap(filename):
+    heatmap_folder = os.path.join(os.path.dirname(__file__), "heatmaps")
+    return send_from_directory(heatmap_folder, filename)
+
 
 
 # -------- RUN SERVER --------
