@@ -11,23 +11,29 @@ MODELS_DIR = os.path.join(ROOT_DIR, "models")
 print("ROOT_DIR =", ROOT_DIR)
 print("MODELS_DIR =", MODELS_DIR)
 
-# Add project root + models folder to Python path
+# Add to Python path
 sys.path.insert(0, ROOT_DIR)
 sys.path.insert(0, MODELS_DIR)
 
-# ------- FLASK SETUP --------
+# ==========================================
+#  FLASK APP SETUP
+# ==========================================
 from flask import Flask, jsonify
 from flask_cors import CORS
 
-# NEW: storage import
-from backend.utils.storage import load
+# storage loader
+try:
+    from backend.utils.storage import load
+except:
+    # fallback if backend folder is not used
+    from utils.storage import load
 
 app = Flask(__name__, static_folder="static")
 CORS(app)
 
-# =======================================
-#  REGISTER ALL AVAILABLE MODEL ROUTES
-# =======================================
+# ==========================================
+#  REGISTER ALL MODEL ROUTES
+# ==========================================
 
 # -------- ANOMALY DETECTION --------
 try:
@@ -70,7 +76,9 @@ except Exception as e:
     print("✗ Failed to load Human Activity model:", e)
 
 
-# -------- ROOT ENDPOINT --------
+# ==========================================
+#  ROOT ENDPOINT
+# ==========================================
 @app.route("/")
 def home():
     return {
@@ -78,30 +86,25 @@ def home():
         "models": ["anomaly", "coral", "risk", "pollution", "activity"]
     }
 
-
-# -------- NEW: SUMMARY ENDPOINT --------
+# ==========================================
+#  SUMMARY ENDPOINT
+# ==========================================
 @app.route("/summary", methods=["GET"])
 def summary():
-    """
-    Returns combined outputs of all models:
-    - risk
-    - pollution
-    - coral
-    - mehi
-    """
+
     data = load()
 
     # ensure coral exists
-    if "coral" not in data:
-        data["coral"] = {"health_score": 0.7}
+    data.setdefault("coral", {"health_score": 0.7})
 
     # ensure risk exists
-    if "risk" not in data:
-        data["risk"] = {"risk_level": "Unknown"}
+    data.setdefault("risk", {"risk_level": "Unknown"})
 
     # ensure pollution exists
-    if "pollution" not in data:
-        data["pollution"] = {}
+    data.setdefault("pollution", {})
+
+    # ensure human activity exists
+    data.setdefault("activity", {"impact_score": "Unknown"})
 
     # ensure human activity exists
     if "activity" not in data:

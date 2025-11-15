@@ -6,16 +6,42 @@ def risk_badge(score):
     else:
         return "🔴 HIGH RISK"
 
+
 def recommendation(score):
     """
-    Return smart recommendations to decrease pollution based on risk score.
-    These are general, replace with policy-specific text if needed.
+    Detailed human activity impact recommendations based on activity risk.
+    Includes emojis and multiline descriptions (flattened later in main.py).
     """
     if score < 30:
-        return "Maintain current practices; continue monitoring."
+        return (
+            "🟢 Low human activity detected.\n"
+            "Marine ecosystem appears stable with minimal disturbance.\n"
+            "Recommended actions:\n"
+            "- Continue periodic monitoring.\n"
+            "- Maintain existing environmental practices.\n"
+            "- Encourage low-impact tourism."
+        )
+
     elif score < 70:
-        return ("Moderate risk: enforce vessel speed limits, schedule port traffic, "
-                "tighten industrial discharge monitoring, and promote sustainable tourism.")
+        return (
+            "🟡 Moderate activity detected.\n"
+            "There is noticeable pressure on the ecosystem from shipping, tourism,\n"
+            "and coastal industries. Recommended actions:\n"
+            "- Enforce vessel speed regulations.\n"
+            "- Regulate coastal construction activities.\n"
+            "- Increase water-quality checks.\n"
+            "- Strengthen industrial effluent monitoring."
+        )
+
     else:
-        return ("High risk: restrict non-essential ship movements, impose temporary port limits, "
-                "increase inspections on industrial effluent, and implement emergency response plans.")
+        return (
+            "🔴 High human activity intensity detected.\n"
+            "The region is likely experiencing significant environmental stress\n"
+            "due to ports, heavy shipping traffic, tourism clusters, and industries.\n"
+            "Immediate recommended actions:\n"
+            "- Restrict non-essential ship movements.\n"
+            "- Implement emergency pollution-control measures.\n"
+            "- Schedule port operations to reduce peak congestion.\n"
+            "- Increase inspections of industrial discharge sources.\n"
+            "- Deploy rapid-response marine conservation teams."
+        )

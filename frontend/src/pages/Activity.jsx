@@ -135,6 +135,7 @@ const Activity = () => {
       gap: '1.5rem',
       marginBottom: '2rem'
     },
+
     metricCard: {
       background: 'rgba(0, 180, 216, 0.1)',
       padding: '1rem 1.5rem',
@@ -144,12 +145,14 @@ const Activity = () => {
       justifyContent: 'space-between',
       alignItems: 'center'
     },
+
     metricValue: {
       fontSize: '1.6rem',
       fontWeight: '700',
       color: '#00b4d8',
       fontFamily: 'Poppins'
     },
+
     metricLabel: {
       fontSize: '0.9rem',
       color: '#90e0ef',
