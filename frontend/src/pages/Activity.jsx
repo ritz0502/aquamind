@@ -6,8 +6,9 @@ import Footer from '../components/Footer';
 import { useOceanInput } from '../context/OceanInputContext';
 import { useModelResults } from '../context/ModelResultsContext';
 
+// ✅ Correct environment variable
 const BACKEND_BASE =
-  import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+  import.meta.env.VITE_API_BASE || "http://localhost:5000";
 
 const Activity = () => {
   const navigate = useNavigate();
@@ -41,10 +42,10 @@ const Activity = () => {
       const data = await response.json();
 
       setResult(data);
-      updateResult("activity", data);
+      updateResult("activity", data); // store in global context
     } catch (error) {
       console.error(error);
-      alert("Error connecting to backend or running model.");
+      alert("Error connecting to backend or running the model.");
     } finally {
       setLoading(false);
     }
@@ -91,7 +92,7 @@ const Activity = () => {
       borderRadius: '12px',
       border: '1px solid rgba(0, 180, 216, 0.3)',
       marginBottom: '2rem',
-      boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)'
+      boxShadow: '0 4px 15px rgba(0,0,0,0.3)'
     },
     sectionTitle: {
       fontFamily: 'Merriweather, serif',
@@ -107,6 +108,8 @@ const Activity = () => {
     inputItem: { fontFamily: 'Poppins, sans-serif', fontSize: '0.9rem' },
     inputLabel: { color: '#90e0ef', marginRight: '0.5rem' },
     inputValue: { color: '#fff', fontWeight: '500' },
+
+    // BUTTONS
     buttonGroup: {
       display: 'flex',
       gap: '1rem',
@@ -123,13 +126,15 @@ const Activity = () => {
       borderRadius: '50px',
       color: '#fff',
       cursor: 'pointer',
-      boxShadow: '0 0 15px rgba(0, 180, 216, 0.3)',
+      boxShadow: '0 0 15px rgba(0,180,216,0.3)',
       transition: 'all 0.3s ease'
     },
     disabledButton: { opacity: 0.5, cursor: 'not-allowed' },
+
+    // METRICS GRID
     metricsGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(3, 1fr)',   // ⭐ EXACT 3 PER ROW
+      gridTemplateColumns: 'repeat(3, 1fr)',
       gap: '1.5rem',
       marginBottom: '2rem'
     },
@@ -138,21 +143,17 @@ const Activity = () => {
       background: 'rgba(0, 180, 216, 0.1)',
       padding: '1rem 1.5rem',
       borderRadius: '10px',
-      border: '1px solid rgba(0, 180, 216, 0.3)',
+      border: '1px solid rgba(0,180,216,0.3)',
       display: 'flex',
       justifyContent: 'space-between',
-      alignItems: 'center',
-      textAlign: 'left'
+      alignItems: 'center'
     },
 
     metricValue: {
       fontSize: '1.6rem',
       fontWeight: '700',
       color: '#00b4d8',
-      fontFamily: 'Poppins, sans-serif',
-      whiteSpace: 'normal',
-      wordBreak: 'break-word',
-      lineHeight: '1.2',
+      fontFamily: 'Poppins'
     },
 
     metricLabel: {
@@ -163,7 +164,7 @@ const Activity = () => {
     resultInsight: {
       fontSize: '1.1rem',
       color: '#caf0f8',
-      marginBottom: '2rem'
+      marginBottom: '1rem'
     }
   };
 
@@ -201,68 +202,69 @@ const Activity = () => {
               <div style={styles.metricsGrid}>
                 <div style={styles.metricCard}>
                   <div style={styles.metricValue}>
-                    {result.score?.toFixed(1) || 0}
+                    {result.score?.toFixed(1)}
                   </div>
                   <div style={styles.metricLabel}>Risk Score</div>
                 </div>
 
                 <div style={styles.metricCard}>
-                  <div style={styles.metricValue}>{result.badge || "N/A"}</div>
+                  <div style={styles.metricValue}>{result.badge}</div>
                   <div style={styles.metricLabel}>Badge</div>
                 </div>
 
                 <div style={styles.metricCard}>
-                  <div style={styles.metricValue}>{result.features?.ports || 0}</div>
+                  <div style={styles.metricValue}>{result.features?.ports}</div>
                   <div style={styles.metricLabel}>Nearby Ports</div>
                 </div>
 
                 <div style={styles.metricCard}>
-                  <div style={styles.metricValue}>{result.features?.industries || 0}</div>
+                  <div style={styles.metricValue}>{result.features?.industries}</div>
                   <div style={styles.metricLabel}>Industries</div>
                 </div>
 
                 <div style={styles.metricCard}>
-                  <div style={styles.metricValue}>{result.features?.hotels || 0}</div>
+                  <div style={styles.metricValue}>{result.features?.hotels}</div>
                   <div style={styles.metricLabel}>Hotels</div>
                 </div>
 
                 <div style={styles.metricCard}>
-                  <div style={styles.metricValue}>{result.features?.ships || 0}</div>
+                  <div style={styles.metricValue}>{result.features?.ships}</div>
                   <div style={styles.metricLabel}>Ships Density</div>
                 </div>
               </div>
 
-             <p
+              {/* Recommendation */}
+              <p
                 style={styles.resultInsight}
                 dangerouslySetInnerHTML={{
                   __html: result.recommendation
-                    .replace(/\|/g, "")                 // remove |
-                    .replace(/-\s*/g, "• ")             // turn - into bullet •
-                    .replace(/\.\s+/g, ".<br><br>")     // paragraph spacing
+                    .replace(/\|/g, "")
+                    .replace(/-\s*/g, "• ")
+                    .replace(/\.\s+/g, ".<br><br>")
                 }}
-                ></p>
+              ></p>
 
+              {/* Heatmap */}
+              {/* Heatmap */}
+<iframe
+  key={Date.now()}
+  src={`${BACKEND_BASE}/heatmaps/activity_map.html?t=${Date.now()}`}
+  style={{
+    width: "100%",
+    height: "500px",
+    border: "none",
+    borderRadius: "12px",
+    marginTop: "20px",
+    background: "#fff"
+  }}
+  title="activity-map"
+/>
 
-              {/* ⭐ ADDED FOR HEATMAP */}
-              <iframe
-                key={Date.now()}
-                src="/heatmaps/activity_map.html"
-                style={{
-                  width: "100%",
-                  height: "500px",
-                  border: "none",
-                  borderRadius: "12px",
-                  marginTop: "20px",
-                  boxShadow: "0 0 20px rgba(0,180,255,0.25)"
-                }}
-                title="activity-map"
-              />
 
             </div>
           )}
 
-
-          {/* Buttons */}
+          {/* Run Button */}
           <div style={styles.buttonGroup}>
             <button
               style={{

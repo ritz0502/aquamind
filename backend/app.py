@@ -1,6 +1,9 @@
 import sys
 import os
 
+
+from flask import send_from_directory
+
 # ------- PATH CONFIG ---------
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 MODELS_DIR = os.path.join(ROOT_DIR, "models")
@@ -104,7 +107,18 @@ def summary():
     if "activity" not in data:
         data["activity"] = {"impact_score": "Unknown"}
 
+    # ensure human activity exists
+    if "activity" not in data:
+        data["activity"] = {"impact_score": "Unknown"}
+
     return jsonify(data)
+
+
+@app.route("/heatmaps/<path:filename>")
+def serve_heatmap(filename):
+    heatmap_folder = os.path.join(os.path.dirname(__file__), "heatmaps")
+    return send_from_directory(heatmap_folder, filename)
+
 
 
 # -------- RUN SERVER --------

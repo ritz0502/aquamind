@@ -21,17 +21,17 @@ const Dashboard = () => {
     });
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        updateInput('imageUrl', reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  // const handleImageUpload = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     setImageFile(file);
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       updateInput('imageUrl', reader.result);
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
   const handleAnalyze = () => {
     if (!inputs.lat || !inputs.lon || !inputs.depth || !inputs.salinity || !inputs.temperature || !inputs.pH) {
@@ -287,6 +287,48 @@ const Dashboard = () => {
                   onChange={handleImageUpload}
                 />
               </div>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Water Depth (m) *</label>
+                <input
+                  type="number"
+                  style={styles.input}
+                  value={inputs.depth}
+                  onChange={(e) => updateInput('depth', e.target.value)}
+                  placeholder="e.g., 50"
+                />
+              </div>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Salinity (PSU) *</label>
+                <input
+                  type="number"
+                  style={styles.input}
+                  value={inputs.salinity}
+                  onChange={(e) => updateInput('salinity', e.target.value)}
+                  placeholder="e.g., 35"
+                />
+              </div>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>Temperature (°C) *</label>
+                <input
+                  type="number"
+                  style={styles.input}
+                  value={inputs.temperature}
+                  onChange={(e) => updateInput('temperature', e.target.value)}
+                  placeholder="e.g., 25"
+                />
+              </div>
+              <div style={styles.inputGroup}>
+                <label style={styles.label}>pH Level *</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  style={styles.input}
+                  value={inputs.pH}
+                  onChange={(e) => updateInput('pH', e.target.value)}
+                  placeholder="e.g., 8.1"
+                />
+              </div>
+              
             </div>
 
             <button

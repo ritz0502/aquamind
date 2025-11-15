@@ -1,28 +1,26 @@
-import json
 import os
+import json
 
-# Path to combined JSON file
-FILE_PATH = os.path.join("backend", "data", "combined_outputs.json")
+# Always compute absolute path regardless of where app runs
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, "data")
 
-# Ensure directory exists
-os.makedirs(os.path.dirname(FILE_PATH), exist_ok=True)
+# Full absolute path
+FILE_PATH = os.path.join(DATA_DIR, "combined_outputs.json")
 
-# If file does not exist, create it with empty structure
-if not os.path.exists(FILE_PATH):
-    with open(FILE_PATH, "w") as f:
-        json.dump({}, f, indent=4)
-
+# Create folder if missing
+os.makedirs(DATA_DIR, exist_ok=True)
 
 def load():
-    """Load combined model outputs."""
+    if not os.path.exists(FILE_PATH):
+        return {}
     try:
         with open(FILE_PATH, "r") as f:
             return json.load(f)
     except:
-        return {}   # fallback safe
+        return {}
 
-
-def save(data: dict):
-    """Save combined model outputs."""
+def save(data):
+    os.makedirs(DATA_DIR, exist_ok=True)  # Ensure folder
     with open(FILE_PATH, "w") as f:
         json.dump(data, f, indent=4)

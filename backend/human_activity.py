@@ -6,7 +6,7 @@ import os
 import sys
 import re
 
-human_activity_bp = Blueprint("human_activity_bp", __name__)
+human_activity_bp = Blueprint("human_activity", __name__)
 
 @human_activity_bp.route("/run", methods=["POST"])
 def run_human_activity():
