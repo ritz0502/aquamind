@@ -1,38 +1,30 @@
 import sys
 import os
 
-# ==========================================
-#  PATH CONFIGURATION
-# ==========================================
+# ------- PATH CONFIG ---------
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 MODELS_DIR = os.path.join(ROOT_DIR, "models")
 
 print("ROOT_DIR =", ROOT_DIR)
 print("MODELS_DIR =", MODELS_DIR)
 
-# Add to Python path
+# Add project root + models folder to Python path
 sys.path.insert(0, ROOT_DIR)
 sys.path.insert(0, MODELS_DIR)
 
-# ==========================================
-#  FLASK APP SETUP
-# ==========================================
+# ------- FLASK SETUP --------
 from flask import Flask, jsonify
 from flask_cors import CORS
 
-# storage loader
-try:
-    from backend.utils.storage import load
-except:
-    # fallback if backend folder is not used
-    from utils.storage import load
+# NEW: storage import
+from backend.utils.storage import load
 
 app = Flask(__name__, static_folder="static")
 CORS(app)
 
-# ==========================================
-#  REGISTER ALL MODEL ROUTES
-# ==========================================
+# =======================================
+#  REGISTER ALL AVAILABLE MODEL ROUTES
+# =======================================
 
 # -------- ANOMALY DETECTION --------
 try:
@@ -75,9 +67,7 @@ except Exception as e:
     print("✗ Failed to load Human Activity model:", e)
 
 
-# ==========================================
-#  ROOT ENDPOINT
-# ==========================================
+# -------- ROOT ENDPOINT --------
 @app.route("/")
 def home():
     return {
@@ -85,31 +75,38 @@ def home():
         "models": ["anomaly", "coral", "risk", "pollution", "activity"]
     }
 
-# ==========================================
-#  SUMMARY ENDPOINT
-# ==========================================
+
+# -------- NEW: SUMMARY ENDPOINT --------
 @app.route("/summary", methods=["GET"])
 def summary():
-
+    """
+    Returns combined outputs of all models:
+    - risk
+    - pollution
+    - coral
+    - mehi
+    """
     data = load()
 
     # ensure coral exists
-    data.setdefault("coral", {"health_score": 0.7})
+    if "coral" not in data:
+        data["coral"] = {"health_score": 0.7}
 
     # ensure risk exists
-    data.setdefault("risk", {"risk_level": "Unknown"})
+    if "risk" not in data:
+        data["risk"] = {"risk_level": "Unknown"}
 
     # ensure pollution exists
-    data.setdefault("pollution", {})
+    if "pollution" not in data:
+        data["pollution"] = {}
 
     # ensure human activity exists
-    data.setdefault("activity", {"impact_score": "Unknown"})
+    if "activity" not in data:
+        data["activity"] = {"impact_score": "Unknown"}
 
     return jsonify(data)
 
 
-# ==========================================
-#  RUN SERVER
-# ==========================================
+# -------- RUN SERVER --------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

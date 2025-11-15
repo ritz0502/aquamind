@@ -18,7 +18,6 @@
 
 Flask==3.0.0
 flask-cors==4.0.0
-numpy==1.26.2
 matplotlib==3.8.2
 seaborn==0.13.0
 # Flask and Web Framework
@@ -26,8 +25,8 @@ Flask==3.0.0
 Flask-CORS==4.0.0
 
 # Machine Learning
-scikit-learn==1.3.2
-numpy==1.26.2
+scikit-learn===1.7.2
+numpy==1.26.4
 pandas==2.1.3
 joblib==1.3.2
 
@@ -44,4 +43,5 @@ python-dotenv==1.0.0
 gunicorn==21.2.0
 requests==2.31.0
 
-
+tensorflow
+opencv-python==4.8.1.78

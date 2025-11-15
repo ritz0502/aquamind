@@ -7,7 +7,7 @@ import Footer from "../components/Footer";
 
 import { useOceanInput } from "../context/OceanInputContext";   // ← IMPORTANT
 
-const API_BASE_URL = "http://localhost:5000";
+const VITE_API_URL = "http://localhost:5000";
 
 function Forecast() {
   const navigate = useNavigate();
@@ -67,7 +67,7 @@ function Forecast() {
     setReportText(null);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/risk/run_pipeline`, {
+      const response = await fetch(`${VITE_API_URL}/risk/run_pipeline`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -86,7 +86,7 @@ function Forecast() {
 
         // FETCH PLOT
         const plotRes = await fetch(
-          `${API_BASE_URL}/risk/get_plot?lat=${formData.lat}&lon=${formData.lon}`
+          `${VITE_API_URL}/risk/get_plot?lat=${formData.lat}&lon=${formData.lon}`
         );
         if (plotRes.ok) {
           const blob = await plotRes.blob();
@@ -95,7 +95,7 @@ function Forecast() {
 
         // FETCH REPORT
         const reportRes = await fetch(
-          `${API_BASE_URL}/risk/get_report?lat=${formData.lat}&lon=${formData.lon}`
+          `${VITE_API_URL}/risk/get_report?lat=${formData.lat}&lon=${formData.lon}`
         );
         if (reportRes.ok) {
           setReportText(await reportRes.text());

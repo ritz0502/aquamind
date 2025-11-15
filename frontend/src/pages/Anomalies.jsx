@@ -52,18 +52,21 @@ const Anomalies = () => {
       display: 'flex',
       flexDirection: 'column',
       minHeight: '100vh',
-      background: 'linear-gradient(180deg, #04121f 0%, #061a2c 100%)',
-      color: '#fff'
+      backgroundColor: '#04121f',
+      paddingTop: '80px',
+      paddingBottom: '60px',
+      fontFamily: 'Poppins, sans-serif',
+      color: '#e3f6fc',
+      position: 'relative'
     },
     mainLayout: {
       display: 'flex',
       flex: 1
     },
     contentArea: {
-      flex: 1,
       padding: '2rem',
-      paddingBottom: '220px',   // ⭐ Increased
-      paddingTop: '100px'
+      paddingBottom: '100px',
+      paddingTop:'50px'
     },
     header: {
       fontFamily: 'Merriweather, serif',
