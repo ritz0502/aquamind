@@ -51,5 +51,5 @@ if __name__ == "__main__":
 
     # ---- Generate Heatmap ----
     print("\n🔥 Generating Heatmap…")
-    create_map(args.lat, args.lon, score)
+    create_map(df, output="../../frontend/public/heatmaps/activity_map.html")
     print("🔥 Heatmap generated successfully!")

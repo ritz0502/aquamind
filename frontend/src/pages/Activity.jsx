@@ -70,7 +70,7 @@ const Activity = () => {
     contentArea: {
       padding: '2rem',
       paddingBottom: '100px',
-      paddingTop: '100px'
+      paddingTop: '50px'
     },
     header: {
       fontFamily: 'Merriweather, serif',
@@ -246,19 +246,19 @@ const Activity = () => {
 
               {/* Heatmap */}
               {/* Heatmap */}
-<iframe
-  key={Date.now()}
-  src={`${BACKEND_BASE}/heatmaps/activity_map.html?t=${Date.now()}`}
-  style={{
-    width: "100%",
-    height: "500px",
-    border: "none",
-    borderRadius: "12px",
-    marginTop: "20px",
-    background: "#fff"
-  }}
-  title="activity-map"
-/>
+              <iframe
+                key={Date.now()}
+                src="/heatmaps/activity_map.html"
+                style={{
+                  width: "100%",
+                  height: "500px",
+                  border: "none",
+                  borderRadius: "12px",
+                  marginTop: "20px",
+                  boxShadow: "0 0 20px rgba(0,180,255,0.25)"
+                }}
+                title="activity-map"
+              />
 
 
             </div>

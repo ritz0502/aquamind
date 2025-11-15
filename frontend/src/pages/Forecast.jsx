@@ -113,14 +113,22 @@ function Forecast() {
   // ========= INLINE CSS ========= //
   const s = {
     page: {
-      minHeight: "100vh",
-      background: "linear-gradient(180deg,#04121f,#061a2c)",
-      color: "#fff",
-      display: "flex",
-      flexDirection: "column",
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh',
+      backgroundColor: '#04121f',
+      paddingTop: '80px',
+      paddingBottom: '60px',
+      fontFamily: 'Poppins, sans-serif',
+      color: '#e3f6fc',
+      position: 'relative'
     },
     main: { display: "flex", flex: 1 },
-    content: { flex: 1, padding: "2rem", paddingTop: "110px" },
+    content: { 
+      padding: '2rem',
+      paddingBottom: '100px',
+      paddingTop:'50px'
+    },
 
     title: {
       fontSize: "2.6rem",

@@ -1,7 +1,7 @@
 {
     "pollution": {
-        "type": "plastic",
-        "explanation": "Detected floating plastic debris \u2014 recommended cleanup and recycling.",
+        "type": "paper",
+        "explanation": "Paper waste detected \u2014 biodegradable, but remove to maintain water clarity.",
         "mask": "static/mask.png",
         "annotated": "static/final_overlay.jpg"
     },

@@ -69,7 +69,7 @@ function Pollution() {
     content: { flex: 1,
       padding: '2rem',
       paddingBottom: '100px',
-      paddingTop:'100px'
+      paddingTop:'50px'
      },
     title: {
       fontSize: "2.6rem",

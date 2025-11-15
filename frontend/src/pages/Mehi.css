@@ -1,10 +1,14 @@
 /* ===== PAGE LAYOUT ===== */
 .mehi-page {
-  min-height: 100vh;
-  background: linear-gradient(180deg, #04121f, #061a2c);
-  color: white;
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
+  background-color: #04121f;
+  padding-top: 80px;
+  padding-bottom: 60px;
+  font-family: 'Poppins, sans-serif';
+  color: #e3f6fc;
+  position: relative;
 }
 
 .mehi-main {
@@ -13,9 +17,8 @@
 }
 
 .mehi-content {
-  flex: 1;
   padding: 2rem;
-  padding-top: 100px;
+  padding-top: 50px;
   padding-bottom: 100px;
 }
 

@@ -47,7 +47,7 @@ const Coral = () => {
     contentArea: {
       padding: '2rem',
       paddingBottom: '100px',
-      paddingTop:'100px'
+      paddingTop:'50px'
 
     },
     header: {

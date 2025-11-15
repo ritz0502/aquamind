@@ -63,7 +63,7 @@ const Dashboard = () => {
       flex: 1,
       padding: '2rem',
       paddingBottom: '100px',
-      paddingTop:'100px'
+      paddingTop: '50px'
     },
     header: {
       fontFamily: 'Merriweather, serif',
@@ -228,36 +228,6 @@ const Dashboard = () => {
                 />
               </div>
               <div style={styles.inputGroup}>
-                <label style={styles.label}>Longitude *</label>
-                <input
-                  type="text"
-                  style={styles.input}
-                  value={inputs.lon}
-                  onChange={(e) => updateInput('lon', e.target.value)}
-                  placeholder="Click map or enter longitude"
-                />
-              </div>
-              <div style={styles.inputGroup}>
-                <label style={styles.label}>Water Depth (m) *</label>
-                <input
-                  type="number"
-                  style={styles.input}
-                  value={inputs.depth}
-                  onChange={(e) => updateInput('depth', e.target.value)}
-                  placeholder="e.g., 50"
-                />
-              </div>
-              <div style={styles.inputGroup}>
-                <label style={styles.label}>Salinity (PSU) *</label>
-                <input
-                  type="number"
-                  style={styles.input}
-                  value={inputs.salinity}
-                  onChange={(e) => updateInput('salinity', e.target.value)}
-                  placeholder="e.g., 35"
-                />
-              </div>
-              <div style={styles.inputGroup}>
                 <label style={styles.label}>Temperature (°C) *</label>
                 <input
                   type="number"
@@ -276,15 +246,6 @@ const Dashboard = () => {
                   value={inputs.pH}
                   onChange={(e) => updateInput('pH', e.target.value)}
                   placeholder="e.g., 8.1"
-                />
-              </div>
-              <div style={styles.inputGroup}>
-                <label style={styles.label}>Coral Image (Optional)</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  style={styles.fileInput}
-                  onChange={handleImageUpload}
                 />
               </div>
               <div style={styles.inputGroup}>
